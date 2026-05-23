@@ -1,6 +1,6 @@
 # Tet4J
 
-An easygoing block-stacking puzzle game built (mostly vibecoded) with [libGDX](https://libgdx.com/) in a relaxed mood.
+Tet4J (Tetrominoes for Java) An easygoing block-stacking puzzle game in a relaxed mood built (mostly vibecoded) with [libGDX](https://libgdx.com/).
 
 Arrange falling shapes into complete rows to clear them. Level up as you clear rows and unlock new backgrounds.
 

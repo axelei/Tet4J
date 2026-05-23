@@ -1,0 +1,104 @@
+package net.krusher.tet4j.gfx;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import net.krusher.tet4j.Board;
+import net.krusher.tet4j.Constants;
+import net.krusher.tet4j.Tetromino;
+
+public class InfoPanel {
+    private final GlyphLayout glyphLayout = new GlyphLayout();
+    private final Texture pixel;
+
+    public InfoPanel(Texture pixel) {
+        this.pixel = pixel;
+    }
+
+    public void drawTextBg(SpriteBatch batch, BitmapFont font, String text, float x, float y) {
+        glyphLayout.setText(font, text);
+        float pad = Constants.TEXT_BG_PAD;
+        batch.setColor(0, 0, 0, Constants.TEXT_BG_ALPHA);
+        batch.draw(pixel, x - pad, y - glyphLayout.height - pad,
+            glyphLayout.width + pad * 2, glyphLayout.height + pad * 2);
+        batch.setColor(1, 1, 1, 1);
+    }
+
+    public void drawPreview(SpriteBatch batch, BitmapFont font, Board board, Texture[] blockTextures) {
+        int px = Constants.INFO_X;
+        int py = Constants.BOARD_Y + Constants.BOARD_PX_H - 20;
+
+        drawTextBg(batch, font, "NEXT", px, py);
+        font.draw(batch, "NEXT", px, py);
+        py -= 10;
+
+        int[][] shape = Tetromino.getShape(board.nextType, 0);
+        int ps = Constants.PREVIEW_BLOCK_SIZE;
+        for (int r = 0; r < 4; r++) {
+            for (int c = 0; c < 4; c++) {
+                if (shape[r][c] != 0) {
+                    batch.draw(blockTextures[board.nextType.ordinal()],
+                        px + 90 + c * ps, py - r * ps, ps, ps);
+                }
+            }
+        }
+    }
+
+    public void drawUI(SpriteBatch batch, BitmapFont font, Board board) {
+        int px = Constants.INFO_X;
+        int py = Constants.BOARD_Y + Constants.BOARD_PX_H - 120;
+
+        drawTextBg(batch, font, "SCORE", px, py);
+        font.draw(batch, "SCORE", px, py); py -= 22;
+        drawTextBg(batch, font, String.valueOf(board.score), px, py);
+        font.draw(batch, String.valueOf(board.score), px, py); py -= 35;
+        drawTextBg(batch, font, "LINES", px, py);
+        font.draw(batch, "LINES", px, py); py -= 22;
+        drawTextBg(batch, font, String.valueOf(board.lines), px, py);
+        font.draw(batch, String.valueOf(board.lines), px, py); py -= 35;
+        drawTextBg(batch, font, "LEVEL", px, py);
+        font.draw(batch, "LEVEL", px, py); py -= 22;
+        drawTextBg(batch, font, String.valueOf(board.level), px, py);
+        font.draw(batch, String.valueOf(board.level), px, py);
+
+        drawTextBg(batch, font, "ARROWS: Move/Rotate", Constants.INFO_X, 78);
+        font.draw(batch, "ARROWS: Move/Rotate", Constants.INFO_X, 78);
+        drawTextBg(batch, font, "SPACE: Hard Drop", Constants.INFO_X, 60);
+        font.draw(batch, "SPACE: Hard Drop", Constants.INFO_X, 60);
+        drawTextBg(batch, font, "P: Pause", Constants.INFO_X, 42);
+        font.draw(batch, "P: Pause", Constants.INFO_X, 42);
+        if (board.cheatMode) {
+            drawTextBg(batch, font, "CHEATER!!", Constants.INFO_X, 24);
+            font.draw(batch, "CHEATER!!", Constants.INFO_X, 24);
+        }
+    }
+
+    public void drawSplash(SpriteBatch batch, Texture splashTexture, BitmapFont bigFont) {
+        batch.begin();
+        batch.draw(splashTexture, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        bigFont.draw(batch, "push any key", Constants.SCREEN_WIDTH / 2f - 150, 100);
+        batch.end();
+    }
+
+    public void drawGameOver(SpriteBatch batch, ShapeRenderer shapes, Board board, BitmapFont bigFont, BitmapFont font) {
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        shapes.begin(ShapeType.Filled);
+        shapes.setColor(0, 0, 0, Constants.GAMEOVER_OVERLAY_ALPHA);
+        shapes.rect(Constants.BOARD_X, Constants.BOARD_Y, Constants.BOARD_PX_W, Constants.BOARD_PX_H);
+        shapes.end();
+
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+
+        batch.begin();
+        bigFont.draw(batch, "GAME OVER", Constants.BOARD_X + 20, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + 30);
+        font.draw(batch, "Press SPACE to restart", Constants.BOARD_X + 45, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f - 15);
+        batch.end();
+    }
+}

@@ -6,8 +6,17 @@ import net.krusher.tet4j.Main;
 
 public class Lwjgl3Launcher {
     public static void main(String[] args) {
-        if (StartupHelper.startNewJvmIfRequired()) return;
-        createApplication();
+        try {
+            if (StartupHelper.startNewJvmIfRequired()) return;
+            createApplication();
+        } catch (Throwable t) {
+            try {
+                java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter("tet4j.log"));
+                t.printStackTrace(pw);
+                pw.close();
+            } catch (java.io.IOException ignored) {}
+            throw t;
+        }
     }
 
     private static Lwjgl3Application createApplication() {

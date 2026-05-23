@@ -18,7 +18,6 @@ apply plugin: 'io.github.fourlastor.construo'
 
 import io.github.fourlastor.construo.Target
 
-sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
 application.mainClass = 'net.krusher.tet4j.lwjgl3.Lwjgl3Launcher'
 application.applicationName = appName
 eclipse.project.name = appName + '-lwjgl3'
@@ -29,25 +28,26 @@ java {
 }
 
 dependencies {
-  implementation "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
-  implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
-  implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-  implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
-  implementation project(':core')
+    implementation "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+    implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+    implementation project(':core')
+    implementation project(':util')
 
-  if(enableGraalNative == 'true') {
-    implementation "io.github.berstanio:gdx-svmhelper-backend-lwjgl3:$graalHelperVersion"
+    if(enableGraalNative == 'true') {
+      implementation "io.github.berstanio:gdx-svmhelper-backend-lwjgl3:$graalHelperVersion"
 
-  }
-  // Forces LWJGL3 to use at least $lwjgl3Version, currently 3.4.1, to avoid problems on Java 25 and up.
-  constraints{
-    implementation("org.lwjgl:lwjgl:$lwjgl3Version")
-    implementation("org.lwjgl:lwjgl-glfw:$lwjgl3Version")
-    implementation("org.lwjgl:lwjgl-jemalloc:$lwjgl3Version")
-    implementation("org.lwjgl:lwjgl-openal:$lwjgl3Version")
-    implementation("org.lwjgl:lwjgl-opengl:$lwjgl3Version")
-    implementation("org.lwjgl:lwjgl-stb:$lwjgl3Version")
-  }
+    }
+    // Forces LWJGL3 to use at least $lwjgl3Version, currently 3.4.1, to avoid problems on Java 25 and up.
+    constraints{
+      implementation("org.lwjgl:lwjgl:$lwjgl3Version")
+      implementation("org.lwjgl:lwjgl-glfw:$lwjgl3Version")
+      implementation("org.lwjgl:lwjgl-jemalloc:$lwjgl3Version")
+      implementation("org.lwjgl:lwjgl-openal:$lwjgl3Version")
+      implementation("org.lwjgl:lwjgl-opengl:$lwjgl3Version")
+      implementation("org.lwjgl:lwjgl-stb:$lwjgl3Version")
+    }
 }
 
 def os = System.properties['os.name'].toLowerCase(Locale.ROOT)
@@ -126,6 +126,13 @@ tasks.register("jarWin") {
   }
 }
 
+def rootFilesToInclude = ['attributions.md', 'README.md']
+
+dependencies {
+    implementation 'org.commonmark:commonmark:0.22.0'
+    implementation 'org.commonmark:commonmark-ext-gfm-tables:0.22.0'
+}
+
 construo {
   // name of the executable
   name.set(appName)
@@ -133,8 +140,7 @@ construo {
   humanName.set(appName)
   jlink {
     guessModulesFromJar.set(false)
-    // You may need to add more modules, as needed.
-    modules.addAll("java.base", "java.management", "java.desktop", "jdk.unsupported")
+    modules.addAll("java.base", "java.management", "java.desktop", "java.logging", "java.xml", "jdk.unsupported")
   }
 
   targets.configure {
@@ -170,6 +176,16 @@ construo {
   }
 }
 
+tasks.register('copyAssetsWinX64', Copy) {
+    from rootProject.file('assets')
+    into layout.buildDirectory.dir("construo/winX64/roast/runtime/bin/assets")
+    dependsOn 'createRuntimeImageWinX64'
+}
+
+tasks.named('packageWinX64') {
+    dependsOn 'copyAssetsWinX64'
+}
+
 // Equivalent to the jar task; here for compatibility with gdx-setup.
 tasks.register('dist') {
   dependsOn 'jar'
@@ -202,6 +218,309 @@ startScripts.classpath = project.tasks.jar.outputs.files
 // a good thing for end users. They won't need to ever set the debug-specific environment variable.
 tasks.withType(JavaExec.class).configureEach {
   environment("__GL_THREADED_OPTIMIZATIONS", 0)
+}
+
+// Copy assets into construo runtime bins for each target and next to the produced JAR
+tasks.register('copyAssetsLinuxX64', Copy) {
+    from rootProject.file('assets')
+    into layout.buildDirectory.dir("construo/linuxX64/roast/runtime/bin/assets")
+    dependsOn 'createRuntimeImageLinuxX64'
+}
+tasks.named('packageLinuxX64') {
+    dependsOn 'copyAssetsLinuxX64'
+}
+
+tasks.register('copyAssetsMacM1', Copy) {
+    from rootProject.file('assets')
+    into layout.buildDirectory.dir("construo/macM1/roast/runtime/bin/assets")
+    dependsOn 'createRuntimeImageMacM1'
+}
+tasks.named('packageMacM1') {
+    dependsOn 'copyAssetsMacM1'
+}
+
+tasks.register('copyAssetsMacX64', Copy) {
+    from rootProject.file('assets')
+    into layout.buildDirectory.dir("construo/macX64/roast/runtime/bin/assets")
+    dependsOn 'createRuntimeImageMacX64'
+}
+tasks.named('packageMacX64') {
+    dependsOn 'copyAssetsMacX64'
+}
+
+// Aggregate task defined later (includes package copies)
+
+// Copy assets next to the produced JAR in build/libs
+tasks.register('copyAssetsJar', Copy) {
+    from rootProject.file('assets')
+    into layout.buildDirectory.dir('libs/assets')
+    dependsOn 'jar'
+}
+
+tasks.register('convertMarkdownToHtml', JavaExec) {
+    dependsOn ':util:compileJava'
+    classpath = files(project(':util').sourceSets.main.runtimeClasspath) + sourceSets.main.runtimeClasspath
+    mainClass = 'net.krusher.tet4j.util.MarkdownConverter'
+    args rootFilesToInclude.collect { rootProject.file(it).absolutePath }
+}
+
+tasks.named('dist') {
+    dependsOn 'copyAssetsJar'
+}
+
+// Some packaging steps create a package/ directory used by the plugin. Ensure assets are added to the ZIP root
+// without the redundant 'package/' folder.
+
+// package tasks: copy assets to roast root so assets/ exists at the staged root
+tasks.named('packageWinX64') {
+    dependsOn 'clean','copyAssetsWinX64', 'convertMarkdownToHtml'
+    doFirst {
+        copy {
+            from rootProject.file('assets')
+            into layout.buildDirectory.dir("construo/winX64/roast/assets")
+        }
+        // Copy additional files to the root of the ZIP
+        rootFilesToInclude.each { fileName ->
+            if (fileName.endsWith('.md')) {
+                File htmlFile = new File(rootProject.projectDir, fileName.replace('.md', '.html'))
+                if (htmlFile.exists()) {
+                    copy {
+                        from htmlFile
+                        into layout.buildDirectory.dir("construo/winX64/roast")
+                        rename { fileName.replace('.md', '.html') }
+                    }
+                }
+            } else {
+                copy {
+                    from rootProject.file(fileName)
+                    into layout.buildDirectory.dir("construo/winX64/roast")
+                }
+            }
+        }
+        // remove duplicate package/assets so it isn't included nested in the ZIP
+        delete layout.buildDirectory.dir("construo/winX64/roast/package/assets")
+    }
+    doLast {
+        rootFilesToInclude.each { fileName ->
+            if (fileName.endsWith('.md')) {
+                File htmlFile = new File(rootProject.projectDir, fileName.replace('.md', '.html'))
+                if (htmlFile.exists()) {
+                    htmlFile.delete()
+                }
+            }
+        }
+    }
+}
+try {
+    tasks.named('packageWinX64', Zip) { Zip z ->
+        from(layout.buildDirectory.dir("construo/winX64/roast")) {
+            eachFile { fcd ->
+                def segs = fcd.relativePath.segments
+                if (segs.length > 0 && segs[0] == 'package') {
+                    def newSegs = segs.length > 1 ? segs[1..-1] : []
+                    if (newSegs.size() > 0) {
+                        fcd.relativePath = new org.gradle.api.file.RelativePath(true, newSegs as String[])
+                    } else {
+                        fcd.exclude()
+                    }
+                }
+            }
+            includeEmptyDirs = false
+        }
+        from(rootProject.file('assets')) { into 'assets' }
+        // ensure the empty 'package/' dir does not end up in the ZIP
+        exclude('package/')
+    }
+} catch(Exception ignored) {}
+
+
+tasks.named('packageLinuxX64') {
+    dependsOn 'clean','copyAssetsLinuxX64', 'convertMarkdownToHtml'
+    doFirst {
+        copy {
+            from rootProject.file('assets')
+            into layout.buildDirectory.dir("construo/linuxX64/roast/assets")
+        }
+        // Copy additional files to the root of the ZIP
+        rootFilesToInclude.each { fileName ->
+            if (fileName.endsWith('.md')) {
+                File htmlFile = new File(rootProject.projectDir, fileName.replace('.md', '.html'))
+                if (htmlFile.exists()) {
+                    copy {
+                        from htmlFile
+                        into layout.buildDirectory.dir("construo/linuxX64/roast")
+                        rename { fileName.replace('.md', '.html') }
+                    }
+                }
+            } else {
+                copy {
+                    from rootProject.file(fileName)
+                    into layout.buildDirectory.dir("construo/linuxX64/roast")
+                }
+            }
+        }
+        delete layout.buildDirectory.dir("construo/linuxX64/roast/package/assets")
+    }
+    doLast {
+        rootFilesToInclude.each { fileName ->
+            if (fileName.endsWith('.md')) {
+                File htmlFile = new File(rootProject.projectDir, fileName.replace('.md', '.html'))
+                if (htmlFile.exists()) {
+                    htmlFile.delete()
+                }
+            }
+        }
+    }
+}
+try {
+    tasks.named('packageLinuxX64', Zip) { Zip z ->
+        from(layout.buildDirectory.dir("construo/linuxX64/roast")) {
+            eachFile { fcd ->
+                def segs = fcd.relativePath.segments
+                if (segs.length > 0 && segs[0] == 'package') {
+                    def newSegs = segs.length > 1 ? segs[1..-1] : []
+                    if (newSegs.size() > 0) {
+                        fcd.relativePath = new org.gradle.api.file.RelativePath(true, newSegs as String[])
+                    } else {
+                        fcd.exclude()
+                    }
+                }
+            }
+            includeEmptyDirs = false
+        }
+        from(rootProject.file('assets')) { into 'assets' }
+        // ensure the empty 'package/' dir does not end up in the ZIP
+        exclude('package/')
+    }
+} catch(Exception ignored) {}
+
+
+tasks.named('packageMacM1') {
+    dependsOn 'clean','copyAssetsMacM1', 'convertMarkdownToHtml'
+    doFirst {
+        copy {
+            from rootProject.file('assets')
+            into layout.buildDirectory.dir("construo/macM1/roast/assets")
+        }
+        // Copy additional files to the root of the ZIP
+        rootFilesToInclude.each { fileName ->
+            if (fileName.endsWith('.md')) {
+                File htmlFile = new File(rootProject.projectDir, fileName.replace('.md', '.html'))
+                if (htmlFile.exists()) {
+                    copy {
+                        from htmlFile
+                        into layout.buildDirectory.dir("construo/macM1/roast")
+                        rename { fileName.replace('.md', '.html') }
+                    }
+                }
+            } else {
+                copy {
+                    from rootProject.file(fileName)
+                    into layout.buildDirectory.dir("construo/macM1/roast")
+                }
+            }
+        }
+        delete layout.buildDirectory.dir("construo/macM1/roast/package/assets")
+    }
+    doLast {
+        rootFilesToInclude.each { fileName ->
+            if (fileName.endsWith('.md')) {
+                File htmlFile = new File(rootProject.projectDir, fileName.replace('.md', '.html'))
+                if (htmlFile.exists()) {
+                    htmlFile.delete()
+                }
+            }
+        }
+    }
+}
+try {
+    tasks.named('packageMacM1', Zip) { Zip z ->
+        from(layout.buildDirectory.dir("construo/macM1/roast")) {
+            eachFile { fcd ->
+                def segs = fcd.relativePath.segments
+                if (segs.length > 0 && segs[0] == 'package') {
+                    def newSegs = segs.length > 1 ? segs[1..-1] : []
+                    if (newSegs.size() > 0) {
+                        fcd.relativePath = new org.gradle.api.file.RelativePath(true, newSegs as String[])
+                    } else {
+                        fcd.exclude()
+                    }
+                }
+            }
+            includeEmptyDirs = false
+        }
+        from(rootProject.file('assets')) { into 'assets' }
+    }
+} catch(Exception ignored) {}
+
+
+tasks.named('packageMacX64') {
+    dependsOn 'clean','copyAssetsMacX64', 'convertMarkdownToHtml'
+    doFirst {
+        copy {
+            from rootProject.file('assets')
+            into layout.buildDirectory.dir("construo/macX64/roast/assets")
+        }
+        // Copy additional files to the root of the ZIP
+        rootFilesToInclude.each { fileName ->
+            if (fileName.endsWith('.md')) {
+                File htmlFile = new File(rootProject.projectDir, fileName.replace('.md', '.html'))
+                if (htmlFile.exists()) {
+                    copy {
+                        from htmlFile
+                        into layout.buildDirectory.dir("construo/macX64/roast")
+                        rename { fileName.replace('.md', '.html') }
+                    }
+                }
+            } else {
+                copy {
+                    from rootProject.file(fileName)
+                    into layout.buildDirectory.dir("construo/macX64/roast")
+                }
+            }
+        }
+        delete layout.buildDirectory.dir("construo/macX64/roast/package/assets")
+    }
+    doLast {
+        rootFilesToInclude.each { fileName ->
+            if (fileName.endsWith('.md')) {
+                File htmlFile = new File(rootProject.projectDir, fileName.replace('.md', '.html'))
+                if (htmlFile.exists()) {
+                    htmlFile.delete()
+                }
+            }
+        }
+    }
+}
+try {
+    tasks.named('packageMacX64', Zip) { Zip z ->
+        from(layout.buildDirectory.dir("construo/macX64/roast")) {
+            eachFile { fcd ->
+                def segs = fcd.relativePath.segments
+                if (segs.length > 0 && segs[0] == 'package') {
+                    def newSegs = segs.length > 1 ? segs[1..-1] : []
+                    if (newSegs.size() > 0) {
+                        fcd.relativePath = new org.gradle.api.file.RelativePath(true, newSegs as String[])
+                    } else {
+                        fcd.exclude()
+                    }
+                }
+            }
+            includeEmptyDirs = false
+        }
+        from(rootProject.file('assets')) { into 'assets' }
+    }
+} catch(Exception ignored) {}
+
+// Aggregate task covering runtime copy tasks
+tasks.register('copyAssetsAllConstruo') {
+    dependsOn 'copyAssetsWinX64','copyAssetsLinuxX64','copyAssetsMacM1','copyAssetsMacX64'
+}
+
+// Prevent any ZIP from including an empty 'package/' directory created by staging
+tasks.withType(Zip).configureEach {
+    exclude 'package/**'
+    exclude 'package/'
 }
 
 if(enableGraalNative == 'true') {

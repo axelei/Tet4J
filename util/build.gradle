@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation 'org.commonmark:commonmark:0.22.0'
+    implementation 'org.commonmark:commonmark-ext-gfm-tables:0.22.0'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}

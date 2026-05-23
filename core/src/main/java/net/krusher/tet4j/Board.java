@@ -8,14 +8,9 @@ import java.util.Arrays;
 import net.krusher.tet4j.Tetromino.Type;
 
 public class Board {
-    public static final int COLS = 10;
-    public static final int ROWS = 22;
-    public static final int VISIBLE_ROWS = 20;
-    public static final float CLEAR_DURATION = 0.5f;
-
     public enum State { PLAYING, CLEARING, GAME_OVER, PAUSED }
 
-    public int[][] grid = new int[ROWS][COLS];
+    public int[][] grid = new int[Constants.BOARD_ROWS][Constants.BOARD_COLS];
     public Type currentType;
     public int currentX, currentY, currentRotation;
     public Type nextType;
@@ -25,15 +20,14 @@ public class Board {
     public boolean cheatMode;
 
     public boolean justCleared;
-    public boolean[] clearedRows = new boolean[ROWS];
+    public boolean justAutoDropped;
+    public boolean[] clearedRows = new boolean[Constants.BOARD_ROWS];
     public int linesCleared;
     public float clearTimer;
 
     private List<Type> bag = new ArrayList<>();
     private float dropTimer;
-    private float dropInterval = 1f;
-
-    private static final int[] SCORE_TABLE = {0, 100, 300, 500, 800};
+    private float dropInterval = Constants.INITIAL_DROP_INTERVAL;
 
     public Board() {
         fillBag();
@@ -56,7 +50,7 @@ public class Board {
     public void spawnPiece() {
         currentType = nextType;
         nextType = drawFromBag();
-        currentX = 3;
+        currentX = Constants.SPAWN_X;
         currentY = 0;
         currentRotation = 0;
         dropTimer = 0;
@@ -74,7 +68,7 @@ public class Board {
                 if (shape[r][c] != 0) {
                     int gr = y + r;
                     int gc = x + c;
-                    if (gc < 0 || gc >= COLS || gr < 0 || gr >= ROWS) return false;
+                    if (gc < 0 || gc >= Constants.BOARD_COLS || gr < 0 || gr >= Constants.BOARD_ROWS) return false;
                     if (grid[gr][gc] != 0) return false;
                 }
             }
@@ -89,7 +83,7 @@ public class Board {
                 if (shape[r][c] != 0) {
                     int gr = currentY + r;
                     int gc = currentX + c;
-                    if (gr >= 0 && gr < ROWS && gc >= 0 && gc < COLS) {
+                    if (gr >= 0 && gr < Constants.BOARD_ROWS && gc >= 0 && gc < Constants.BOARD_COLS) {
                         grid[gr][gc] = currentType.ordinal() + 1;
                     }
                 }
@@ -98,9 +92,9 @@ public class Board {
 
         Arrays.fill(clearedRows, false);
         linesCleared = 0;
-        for (int r = ROWS - 1; r >= 0; r--) {
+        for (int r = Constants.BOARD_ROWS - 1; r >= 0; r--) {
             boolean full = true;
-            for (int c = 0; c < COLS; c++) {
+            for (int c = 0; c < Constants.BOARD_COLS; c++) {
                 if (grid[r][c] == 0) { full = false; break; }
             }
             if (full) {
@@ -123,7 +117,7 @@ public class Board {
 
         if (state == State.CLEARING) {
             clearTimer += delta;
-            if (clearTimer >= CLEAR_DURATION) {
+            if (clearTimer >= Constants.CLEAR_DURATION) {
                 finishClearing();
             }
             return;
@@ -134,6 +128,7 @@ public class Board {
             dropTimer -= dropInterval;
             if (canPlace(currentType, currentRotation, currentX, currentY + 1)) {
                 currentY++;
+                justAutoDropped = true;
             } else {
                 lockPiece();
             }
@@ -142,15 +137,15 @@ public class Board {
 
     private void finishClearing() {
         lines += linesCleared;
-        level = lines / 10;
-        score += SCORE_TABLE[Math.min(linesCleared, 4)] * Math.max(1, level);
-        dropInterval = Math.max(0.05f, 1f - level * 0.08f);
+        level = lines / Constants.LINES_PER_LEVEL;
+        score += Constants.SCORE_TABLE[Math.min(linesCleared, 4)] * Math.max(1, level);
+        dropInterval = Math.max(Constants.MIN_DROP_INTERVAL, Constants.INITIAL_DROP_INTERVAL - level * Constants.DROP_INTERVAL_DECAY);
 
-        int[][] newGrid = new int[ROWS][COLS];
-        int writeRow = ROWS - 1;
-        for (int r = ROWS - 1; r >= 0; r--) {
+        int[][] newGrid = new int[Constants.BOARD_ROWS][Constants.BOARD_COLS];
+        int writeRow = Constants.BOARD_ROWS - 1;
+        for (int r = Constants.BOARD_ROWS - 1; r >= 0; r--) {
             if (!clearedRows[r]) {
-                System.arraycopy(grid[r], 0, newGrid[writeRow], 0, COLS);
+                System.arraycopy(grid[r], 0, newGrid[writeRow], 0, Constants.BOARD_COLS);
                 writeRow--;
             }
         }
@@ -174,7 +169,7 @@ public class Board {
 
     public void rotateCW() {
         if (state != State.PLAYING) return;
-        int newRot = (currentRotation + 1) & 3;
+        int newRot = (currentRotation + 1) & Constants.ROTATION_MASK;
         if (canPlace(currentType, newRot, currentX, currentY)) {
             currentRotation = newRot;
             return;
@@ -223,15 +218,15 @@ public class Board {
     }
 
     public void reset() {
-        for (int r = 0; r < ROWS; r++)
-            for (int c = 0; c < COLS; c++)
+        for (int r = 0; r < Constants.BOARD_ROWS; r++)
+            for (int c = 0; c < Constants.BOARD_COLS; c++)
                 grid[r][c] = 0;
         score = 0;
         lines = 0;
         level = 0;
         gameOver = false;
         state = State.PLAYING;
-        dropInterval = 1f;
+        dropInterval = Constants.INITIAL_DROP_INTERVAL;
         dropTimer = 0;
         Arrays.fill(clearedRows, false);
         linesCleared = 0;
