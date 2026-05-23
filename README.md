@@ -1,8 +1,10 @@
 # Tet4J
 
-A block-stacking puzzle game built with [libGDX](https://libgdx.com/).
+An easygoing block-stacking puzzle game built (mostly vibecoded) with [libGDX](https://libgdx.com/) in a relaxed mood.
 
-Arrange falling shapes into complete rows to clear them. No timer, no pressure — just pick a pace that suits you. Level up as you clear rows and unlock new backgrounds.
+Arrange falling shapes into complete rows to clear them. Level up as you clear rows and unlock new backgrounds.
+
+Assets by the same author under [CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/deed) unless stated so. See the [attributions file](attributions.md).
 
 ## How to play
 

@@ -13,7 +13,7 @@ public class Board {
     public static final int VISIBLE_ROWS = 20;
     public static final float CLEAR_DURATION = 0.5f;
 
-    public enum State { PLAYING, CLEARING, GAME_OVER }
+    public enum State { PLAYING, CLEARING, GAME_OVER, PAUSED }
 
     public int[][] grid = new int[ROWS][COLS];
     public Type currentType;
@@ -22,6 +22,7 @@ public class Board {
     public int score, lines, level;
     public boolean gameOver;
     public State state = State.PLAYING;
+    public boolean cheatMode;
 
     public boolean justCleared;
     public boolean[] clearedRows = new boolean[ROWS];
@@ -47,6 +48,7 @@ public class Board {
     }
 
     private Type drawFromBag() {
+        if (cheatMode) return Type.I;
         if (bag.isEmpty()) fillBag();
         return bag.remove(bag.size() - 1);
     }
@@ -117,7 +119,7 @@ public class Board {
     }
 
     public void update(float delta) {
-        if (state == State.GAME_OVER) return;
+        if (state == State.GAME_OVER || state == State.PAUSED) return;
 
         if (state == State.CLEARING) {
             clearTimer += delta;
