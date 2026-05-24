@@ -26,6 +26,7 @@ public class MusicManager {
     private final List<Music> gameplayMusic = new ArrayList<>();
     private final Map<Music, MusicMetadata> musicMeta = new HashMap<>();
     private Music currentGm;
+    private float fadeOutTimer = -1f;
 
     private final Toast toast;
 
@@ -89,14 +90,33 @@ public class MusicManager {
         if (titleMusic != null) titleMusic.stop();
     }
 
+    public void update(float dt) {
+        if (fadeOutTimer < 0) return;
+        fadeOutTimer += dt;
+        if (fadeOutTimer >= Constants.GM_FADE_DURATION) {
+            if (currentGm != null) currentGm.stop();
+            fadeOutTimer = -1f;
+        } else {
+            float t = fadeOutTimer / Constants.GM_FADE_DURATION;
+            if (currentGm != null) currentGm.setVolume(Constants.GM_VOLUME * (1f - t));
+        }
+    }
+
     public void playCurrentGm() {
         if (currentGm == null) return;
+        cancelFadeOut();
         showMusicToast(musicMeta.get(currentGm));
         playMusic(currentGm);
     }
 
+    private void cancelFadeOut() {
+        fadeOutTimer = -1f;
+        if (currentGm != null) currentGm.setVolume(Constants.GM_VOLUME);
+    }
+
     /** Selects a random track (different from previous) and shows its toast. Does NOT play. */
     public void selectNextTrack() {
+        cancelFadeOut();
         if (currentGm != null) currentGm.stop();
         if (gameplayMusic.isEmpty()) { currentGm = null; return; }
 
@@ -128,12 +148,16 @@ public class MusicManager {
 
     public void updateGameplayMusic(Board.State state) {
         if (state == Board.State.GAME_OVER) {
-            if (currentGm != null && currentGm.isPlaying()) currentGm.stop();
+            if (currentGm != null && currentGm.isPlaying() && fadeOutTimer < 0) {
+                fadeOutTimer = 0f;
+            }
         } else if (state == Board.State.PLAYING) {
             if (currentGm == null) return;
             ensureTrackPlaying();
         } else if (state == Board.State.PAUSED) {
-            if (currentGm != null) currentGm.setVolume(Constants.GM_VOLUME_PAUSED);
+            if (currentGm == null) return;
+            ensureTrackPlaying();
+            currentGm.setVolume(Constants.GM_VOLUME_PAUSED);
         }
     }
 

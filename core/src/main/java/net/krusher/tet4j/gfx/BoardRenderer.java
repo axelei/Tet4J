@@ -26,23 +26,39 @@ public class BoardRenderer {
         this.bgTexture = bgTexture;
         this.pixel = pixel;
         bgSprite = new Sprite(bgTexture);
-        bgSprite.setAlpha(0.25f);
         bgSprite.setPosition(Constants.BOARD_X, Constants.BOARD_Y);
         bgSprite.setSize(Constants.BOARD_PX_W, Constants.BOARD_PX_H);
     }
 
     public void drawBoardBackground(ShapeRenderer shapes) {
+        int bx = Constants.BOARD_X;
+        int by = Constants.BOARD_Y;
+        int bw = Constants.BOARD_PX_W;
+        int bh = Constants.BOARD_PX_H;
+        int out = Constants.BOARD_BORDER_OUTER;
+        int in = Constants.BOARD_BORDER_INNER;
         shapes.begin(ShapeType.Filled);
         shapes.setColor(Constants.BOARD_BORDER_COLOR_DARK);
-        shapes.rect(Constants.BOARD_X - Constants.BOARD_BORDER_OUTER, Constants.BOARD_Y - Constants.BOARD_BORDER_OUTER, Constants.BOARD_PX_W + Constants.BOARD_BORDER_OUTER * 2, Constants.BOARD_PX_H + Constants.BOARD_BORDER_OUTER * 2);
+        shapes.rect(bx - out, by - out, bw + out * 2, out);
+        shapes.rect(bx - out, by + bh, bw + out * 2, out);
+        shapes.rect(bx - out, by, out, bh);
+        shapes.rect(bx + bw, by, out, bh);
         shapes.setColor(Constants.BOARD_BORDER_COLOR_LIGHT);
-        shapes.rect(Constants.BOARD_X - Constants.BOARD_BORDER_INNER, Constants.BOARD_Y - Constants.BOARD_BORDER_INNER, Constants.BOARD_PX_W + Constants.BOARD_BORDER_INNER * 2, Constants.BOARD_PX_H + Constants.BOARD_BORDER_INNER * 2);
+        shapes.rect(bx - in, by - in, bw + in * 2, in);
+        shapes.rect(bx - in, by + bh, bw + in * 2, in);
+        shapes.rect(bx - in, by, in, bh);
+        shapes.rect(bx + bw, by, in, bh);
         shapes.end();
     }
 
     public void drawGame(SpriteBatch batch, BitmapFont bigFont, Board board, ParticleSystem particles, InfoPanel infoPanel, BitmapFont font, boolean askingExit) {
+
         batch.begin();
-        bgSprite.draw(batch);
+        batch.enableBlending();
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        batch.setColor(1, 1, 1, Constants.BG_OPACITY);
+        batch.draw(bgTexture, Constants.BOARD_X, Constants.BOARD_Y, Constants.BOARD_PX_W, Constants.BOARD_PX_H);
+        batch.setColor(1, 1, 1, 1);
 
         if (board.state == Board.State.CLEARING) {
             drawClearingAnimation(batch, board);

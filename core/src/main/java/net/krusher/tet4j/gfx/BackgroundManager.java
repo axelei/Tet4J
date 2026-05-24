@@ -89,7 +89,7 @@ public class BackgroundManager {
     private void generateTint() {
         float h = (float) Math.random() * 360f;
         float l = Math.max(0.12f, Math.min(0.40f, 0.38f - currentLuminosity * 0.20f));
-        hslToRgb(h, 1f, l, tintColor);
+        hslToRgb(h, 0.75f, l, tintColor);
     }
 
     private static void hslToRgb(float h, float s, float l, Color out) {

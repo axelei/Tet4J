@@ -134,6 +134,7 @@ public class Main extends ApplicationAdapter {
 
         float dt = Gdx.graphics.getDeltaTime();
         musicManager.updateToast(dt);
+        musicManager.update(dt);
 
         if (showSplash) {
             infoPanel.drawSplash(batch, splashTexture, bigFont);

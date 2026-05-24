@@ -66,12 +66,14 @@ public class Constants {
 
     public static final float GM_VOLUME = 0.75f;
     public static final float GM_VOLUME_PAUSED = GM_VOLUME * 0.5f;
+    public static final float GM_FADE_DURATION = 2.0f;
 
     public static final int NUM_LEVEL_BG = 10;
     public static final float BG_FADE_DURATION = 0.8f;
     public static final int BG_SPLASH_DRAW_W = 1280;
     public static final int BG_SPLASH_DRAW_H = 720;
 
+    public static final float BG_OPACITY = 0.75f;
     public static final float PAUSE_OVERLAY_ALPHA = 0.6f;
     public static final float GAMEOVER_OVERLAY_ALPHA = 0.65f;
 
