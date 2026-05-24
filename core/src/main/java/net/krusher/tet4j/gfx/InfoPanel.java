@@ -15,9 +15,14 @@ import net.krusher.tet4j.Tetromino;
 public class InfoPanel {
     private final GlyphLayout glyphLayout = new GlyphLayout();
     private final Texture pixel;
+    private float swingTimer;
 
     public InfoPanel(Texture pixel) {
         this.pixel = pixel;
+    }
+
+    public void update(float dt) {
+        swingTimer += dt;
     }
 
     public void drawTextBg(SpriteBatch batch, BitmapFont font, String text, float x, float y) {
@@ -31,19 +36,28 @@ public class InfoPanel {
 
     public void drawPreview(SpriteBatch batch, BitmapFont font, Board board, Texture[] blockTextures) {
         int px = Constants.INFO_X;
-        int py = Constants.BOARD_Y + Constants.BOARD_PX_H - 20;
+        int py = Constants.BOARD_Y + Constants.BOARD_PX_H - Constants.INFO_PREVIEW_TOP_OFFSET;
 
         drawTextBg(batch, font, "NEXT", px, py);
         font.draw(batch, "NEXT", px, py);
-        py -= 10;
+        py -= Constants.INFO_PREVIEW_GAP;
 
         int[][] shape = Tetromino.getShape(board.nextType, 0);
         int ps = Constants.PREVIEW_BLOCK_SIZE;
+        float swing = (float) Math.sin(swingTimer * 2.5) * 4f;
+        float rot = (float) Math.sin(swingTimer * 2.5) * 3f;
+        int baseX = px + Constants.INFO_PREVIEW_BLOCK_X + (int) swing;
+        Texture tex = blockTextures[board.nextType.ordinal()];
         for (int r = 0; r < 4; r++) {
             for (int c = 0; c < 4; c++) {
                 if (shape[r][c] != 0) {
-                    batch.draw(blockTextures[board.nextType.ordinal()],
-                        px + 90 + c * ps, py - r * ps, ps, ps);
+                    batch.draw(tex,
+                        baseX + c * ps, py - r * ps,
+                        ps / 2f, ps / 2f,
+                        ps, ps,
+                        1, 1, rot,
+                        0, 0, tex.getWidth(), tex.getHeight(),
+                        false, false);
                 }
             }
         }
@@ -51,32 +65,32 @@ public class InfoPanel {
 
     public void drawUI(SpriteBatch batch, BitmapFont font, Board board) {
         int px = Constants.INFO_X;
-        int py = Constants.BOARD_Y + Constants.BOARD_PX_H - 120;
+        int py = Constants.BOARD_Y + Constants.BOARD_PX_H - Constants.INFO_UI_TOP_OFFSET;
 
         drawTextBg(batch, font, "SCORE", px, py);
-        font.draw(batch, "SCORE", px, py); py -= 22;
+        font.draw(batch, "SCORE", px, py); py -= Constants.INFO_LABEL_VALUE_GAP;
         drawTextBg(batch, font, String.valueOf(board.score), px, py);
-        font.draw(batch, String.valueOf(board.score), px, py); py -= 35;
+        font.draw(batch, String.valueOf(board.score), px, py); py -= Constants.INFO_VALUE_LABEL_GAP;
         drawTextBg(batch, font, "LINES", px, py);
-        font.draw(batch, "LINES", px, py); py -= 22;
+        font.draw(batch, "LINES", px, py); py -= Constants.INFO_LABEL_VALUE_GAP;
         drawTextBg(batch, font, String.valueOf(board.lines), px, py);
-        font.draw(batch, String.valueOf(board.lines), px, py); py -= 35;
+        font.draw(batch, String.valueOf(board.lines), px, py); py -= Constants.INFO_VALUE_LABEL_GAP;
         drawTextBg(batch, font, "LEVEL", px, py);
-        font.draw(batch, "LEVEL", px, py); py -= 22;
+        font.draw(batch, "LEVEL", px, py); py -= Constants.INFO_LABEL_VALUE_GAP;
         drawTextBg(batch, font, String.valueOf(board.level), px, py);
         font.draw(batch, String.valueOf(board.level), px, py);
 
-        drawTextBg(batch, font, "ARROWS: Move/Rotate", Constants.INFO_X, 78);
-        font.draw(batch, "ARROWS: Move/Rotate", Constants.INFO_X, 78);
-        drawTextBg(batch, font, "SPACE: Hard Drop", Constants.INFO_X, 60);
-        font.draw(batch, "SPACE: Hard Drop", Constants.INFO_X, 60);
-        drawTextBg(batch, font, "P: Pause", Constants.INFO_X, 42);
-        font.draw(batch, "P: Pause", Constants.INFO_X, 42);
-        drawTextBg(batch, font, "ESC: Exit", Constants.INFO_X, 24);
-        font.draw(batch, "ESC: Exit", Constants.INFO_X, 24);
+        drawTextBg(batch, font, "ARROWS: Move/Rotate", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST);
+        font.draw(batch, "ARROWS: Move/Rotate", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST);
+        drawTextBg(batch, font, "SPACE: Hard Drop", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP);
+        font.draw(batch, "SPACE: Hard Drop", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP);
+        drawTextBg(batch, font, "P: Pause", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP * 2);
+        font.draw(batch, "P: Pause", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP * 2);
+        drawTextBg(batch, font, "ESC: Exit", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP * 3);
+        font.draw(batch, "ESC: Exit", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP * 3);
         if (board.cheatMode) {
-            drawTextBg(batch, font, "CHEATER!!", Constants.INFO_X, 24);
-            font.draw(batch, "CHEATER!!", Constants.INFO_X, 24);
+            drawTextBg(batch, font, "CHEATER!!", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP * 3);
+            font.draw(batch, "CHEATER!!", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP * 3);
         }
     }
 

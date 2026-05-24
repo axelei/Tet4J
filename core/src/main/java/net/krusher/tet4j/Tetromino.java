@@ -7,16 +7,6 @@ public class Tetromino {
         I, O, T, S, Z, J, L
     }
 
-    public static final Color[] COLORS = {
-        Color.CYAN,
-        Color.YELLOW,
-        new Color(0.6f, 0, 1, 1),
-        Color.GREEN,
-        Color.RED,
-        Color.BLUE,
-        new Color(1, 0.5f, 0, 1)
-    };
-
     public static final int[][][][] SHAPES = new int[7][4][4][4];
 
     static {

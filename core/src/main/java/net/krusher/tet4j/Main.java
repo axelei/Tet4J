@@ -8,11 +8,14 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import net.krusher.tet4j.audio.MusicManager;
 import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Settings;
@@ -44,6 +47,7 @@ public class Main extends ApplicationAdapter {
     private BoardRenderer boardRenderer;
     private InfoPanel infoPanel;
 
+    private Viewport viewport;
     private boolean showSplash = true;
     private Settings settings;
 
@@ -55,18 +59,20 @@ public class Main extends ApplicationAdapter {
     public void create() {
         // Initialize settings
         settings = new Settings();
-        
+
         // Set up fullscreen mode if enabled
         if (settings.isFullscreenEnabled()) {
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
         }
-        
+
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        viewport = new FitViewport(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT, camera);
+        viewport.apply();
 
         batch = new SpriteBatch();
         shapes = new ShapeRenderer();
-        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Assets.file("fonts/pixel.ttf"));
+        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Assets.file("fonts/ModernDOS8x16.ttf"));
         FreeTypeFontParameter param = new FreeTypeFontParameter();
         param.size = Constants.FONT_SIZE;
         font = fontGen.generateFont(param);
@@ -102,6 +108,11 @@ public class Main extends ApplicationAdapter {
         if (sound != null && settings.isSoundEffectsEnabled()) sound.play();
     }
 
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
+    }
+
     private void loadTextures() {
         String[] blockFiles = {"block_i.png", "block_o.png", "block_t.png",
             "block_s.png", "block_z.png", "block_j.png", "block_l.png"};
@@ -117,7 +128,7 @@ public class Main extends ApplicationAdapter {
     public void render() {
         Gdx.gl.glClearColor(Constants.BOARD_BG.r, Constants.BOARD_BG.g, Constants.BOARD_BG.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        camera.update();
+        viewport.apply();
         batch.setProjectionMatrix(camera.combined);
         shapes.setProjectionMatrix(camera.combined);
 
@@ -128,11 +139,7 @@ public class Main extends ApplicationAdapter {
             infoPanel.drawSplash(batch, splashTexture, bigFont);
             if (!musicManager.isTitlePlaying()) {
                 musicManager.playTitle();
-                if (settings.isMusicEnabled() && musicManager.getTitleMusicMeta() != null) {
-                    musicManager.setToast(musicManager.getTitleMusicMeta().title + "\n"
-                        + musicManager.getTitleMusicMeta().artist + "\n"
-                        + musicManager.getTitleMusicMeta().license);
-                }
+                musicManager.showMusicToast(musicManager.getTitleMusicMeta());
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
                 board.cheatMode = !board.cheatMode;
@@ -173,6 +180,7 @@ public class Main extends ApplicationAdapter {
         }
 
         particleSystem.update(dt);
+        infoPanel.update(dt);
         musicManager.updateGameplayMusic(board.state);
         backgroundManager.update(dt, board.level);
 

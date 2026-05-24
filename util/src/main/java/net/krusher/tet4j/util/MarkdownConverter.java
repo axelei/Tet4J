@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.List;
 
 public class MarkdownConverter {
     public static void main(String[] args) {
@@ -19,10 +20,10 @@ public class MarkdownConverter {
         }
 
         Parser parser = Parser.builder()
-                .extensions(Arrays.asList(TablesExtension.create()))
+                .extensions(List.of(TablesExtension.create()))
                 .build();
         HtmlRenderer renderer = HtmlRenderer.builder()
-                .extensions(Arrays.asList(TablesExtension.create()))
+                .extensions(List.of(TablesExtension.create()))
                 .build();
 
         for (String fileName : args) {

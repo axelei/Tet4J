@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -17,12 +18,17 @@ public class BoardRenderer {
     private final Texture ghostTexture;
     private final Texture bgTexture;
     private final Texture pixel;
+    private final Sprite bgSprite;
 
     public BoardRenderer(Texture[] blockTextures, Texture ghostTexture, Texture bgTexture, Texture pixel) {
         this.blockTextures = blockTextures;
         this.ghostTexture = ghostTexture;
         this.bgTexture = bgTexture;
         this.pixel = pixel;
+        bgSprite = new Sprite(bgTexture);
+        bgSprite.setAlpha(0.25f);
+        bgSprite.setPosition(Constants.BOARD_X, Constants.BOARD_Y);
+        bgSprite.setSize(Constants.BOARD_PX_W, Constants.BOARD_PX_H);
     }
 
     public void drawBoardBackground(ShapeRenderer shapes) {
@@ -36,7 +42,7 @@ public class BoardRenderer {
 
     public void drawGame(SpriteBatch batch, BitmapFont bigFont, Board board, ParticleSystem particles, InfoPanel infoPanel, BitmapFont font, boolean askingExit) {
         batch.begin();
-        batch.draw(bgTexture, Constants.BOARD_X, Constants.BOARD_Y);
+        bgSprite.draw(batch);
 
         if (board.state == Board.State.CLEARING) {
             drawClearingAnimation(batch, board);

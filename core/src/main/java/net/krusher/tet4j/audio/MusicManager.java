@@ -1,17 +1,16 @@
 package net.krusher.tet4j.audio;
 
 import com.badlogic.gdx.Gdx;
-import net.krusher.tet4j.Assets;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.files.FileHandle;
+import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Board;
 import net.krusher.tet4j.Constants;
 import net.krusher.tet4j.Settings;
-import net.krusher.tet4j.audio.MusicMetadata;
+import net.krusher.tet4j.gfx.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,13 +27,10 @@ public class MusicManager {
     private final Map<Music, MusicMetadata> musicMeta = new HashMap<>();
     private Music currentGm;
 
-    private String toastText;
-    private float toastTimer = -1;
-    private final GlyphLayout glyphLayout = new GlyphLayout();
-    private final Texture pixel;
+    private final Toast toast;
 
     public MusicManager(Texture pixel, Settings settings) {
-        this.pixel = pixel;
+        toast = new Toast(pixel);
         this.settings = settings;
 
         // Load title music by enumerating files at runtime
@@ -95,7 +91,7 @@ public class MusicManager {
 
     public void playCurrentGm() {
         if (currentGm == null) return;
-        showTrackToast(currentGm);
+        showMusicToast(musicMeta.get(currentGm));
         playMusic(currentGm);
     }
 
@@ -113,7 +109,7 @@ public class MusicManager {
             } while (currentGm == previousTrack);
         }
 
-        showTrackToast(currentGm);
+        showMusicToast(musicMeta.get(currentGm));
     }
 
     /** Plays the current track if music is enabled, otherwise stops any playing track. */
@@ -143,63 +139,29 @@ public class MusicManager {
 
     // --- Toast ---
 
-    private void showTrackToast(Music track) {
-        if (!settings.isMusicEnabled()) return;
-        MusicMetadata meta = musicMeta.get(track);
-        if (meta != null) setToast(meta.title + "\n" + meta.artist + "\n" + meta.license);
+    public void showMusicToast(MusicMetadata meta) {
+        if (!settings.isMusicEnabled() || meta == null) return;
+        toast.setText(meta.title + "\nBy: " + meta.artist + "\n" + meta.license);
     }
 
     public String getToastText() {
-        return toastText;
+        return toast.getText();
     }
 
     public float getToastTimer() {
-        return toastTimer;
+        return toast.getTimer();
     }
 
     public void setToast(String text) {
-        toastText = text;
-        toastTimer = 0;
+        toast.setText(text);
     }
 
     public void updateToast(float dt) {
-        if (toastTimer >= 0) {
-            toastTimer += dt;
-            if (toastTimer > Constants.TOAST_DURATION) toastTimer = -1;
-        }
+        toast.update(dt);
     }
 
     public void drawToast(SpriteBatch batch, BitmapFont font) {
-        if (toastText == null || toastTimer < 0) return;
-
-        glyphLayout.setText(font, toastText, com.badlogic.gdx.graphics.Color.WHITE, Constants.TOAST_MAX_WIDTH,
-            com.badlogic.gdx.utils.Align.left, true);
-        float th = glyphLayout.height + Constants.TOAST_PAD_Y * 2;
-
-        float alpha = 1f;
-        float yOffset;
-        if (toastTimer < Constants.TOAST_SLIDE_IN) {
-            float t = toastTimer / Constants.TOAST_SLIDE_IN;
-            alpha = t;
-            yOffset = (1 - t) * -(th + Constants.TOAST_SLIDE_OFFSET);
-        } else if (toastTimer > Constants.TOAST_DURATION - Constants.TOAST_SLIDE_OUT) {
-            float t = (Constants.TOAST_DURATION - toastTimer) / Constants.TOAST_SLIDE_OUT;
-            alpha = t;
-            yOffset = (1 - t) * -(th + Constants.TOAST_SLIDE_OFFSET);
-        } else {
-            yOffset = 0;
-        }
-
-        batch.begin();
-        float tx = Constants.SCREEN_WIDTH - Constants.TOAST_MAX_WIDTH - Constants.TOAST_MARGIN_X;
-        float ty = Constants.TOAST_MARGIN_Y + th + yOffset;
-
-        batch.setColor(0, 0, 0, Constants.TOAST_BG_ALPHA * alpha);
-        batch.draw(pixel, tx, ty - th, Constants.TOAST_MAX_WIDTH, th);
-        batch.setColor(1, 1, 1, alpha);
-        font.draw(batch, glyphLayout, tx + Constants.TOAST_PAD_X, ty - Constants.TOAST_PAD_Y);
-        batch.setColor(1, 1, 1, 1);
-        batch.end();
+        toast.draw(batch, font);
     }
 
     public void dispose() {

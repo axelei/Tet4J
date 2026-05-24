@@ -7,7 +7,7 @@ public class Constants {
     public static final int SCREEN_HEIGHT = 720;
 
     public static final int BLOCK_SIZE = 32;
-    public static final int PREVIEW_BLOCK_SIZE = 20;
+    public static final int PREVIEW_BLOCK_SIZE = 28;
 
     public static final int INFO_X = 80;
     public static final int BOARD_X = 420;
@@ -24,8 +24,8 @@ public class Constants {
     public static final Color BOARD_BORDER_COLOR_LIGHT = new Color(0.12f, 0.12f, 0.16f, 1);
     public static final Color BOARD_BG = new Color(0.1f, 0.1f, 0.14f, 1);
 
-    public static final int FONT_SIZE = 16;
-    public static final int FONT_SIZE_BIG = 32;
+    public static final int FONT_SIZE = 24;
+    public static final int FONT_SIZE_BIG = 48;
 
     public static final int SPAWN_X = 3;
 
@@ -77,6 +77,15 @@ public class Constants {
 
     public static final float TEXT_BG_PAD = 4;
     public static final float TEXT_BG_ALPHA = 0.75f;
+
+    public static final int INFO_PREVIEW_TOP_OFFSET = 20;
+    public static final int INFO_UI_TOP_OFFSET = 120;
+    public static final int INFO_PREVIEW_GAP = 12;
+    public static final int INFO_PREVIEW_BLOCK_X = 90;
+    public static final int INFO_LABEL_VALUE_GAP = 26;
+    public static final int INFO_VALUE_LABEL_GAP = 38;
+    public static final int INFO_KEY_LABEL_FIRST = 120;
+    public static final int INFO_KEY_LABEL_STEP = 30;
 
     public static final Color SPLASH_TEXT_COLOR = Color.WHITE;
 }

@@ -45,7 +45,7 @@ public class Board {
     private Type drawFromBag() {
         if (cheatMode) return Type.I;
         if (bag.isEmpty()) fillBag();
-        return bag.remove(bag.size() - 1);
+        return bag.removeLast();
     }
 
     public void spawnPiece() {
