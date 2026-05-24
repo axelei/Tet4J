@@ -97,7 +97,7 @@ public class InfoPanel {
     public void drawSplash(SpriteBatch batch, Texture splashTexture, BitmapFont bigFont) {
         batch.begin();
         batch.draw(splashTexture, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
-        bigFont.draw(batch, "push any key", Constants.SCREEN_WIDTH / 2f - 150, 100);
+        bigFont.draw(batch, "push any key", Constants.SCREEN_WIDTH / 2f - Constants.SPLASH_TEXT_OFFSET_X, Constants.SPLASH_TEXT_Y);
         batch.end();
     }
 
@@ -113,8 +113,8 @@ public class InfoPanel {
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
         batch.begin();
-        bigFont.draw(batch, "GAME OVER", Constants.BOARD_X + 20, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + 30);
-        font.draw(batch, "Press SPACE to restart", Constants.BOARD_X + 45, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f - 15);
+        bigFont.draw(batch, "GAME OVER", Constants.BOARD_X + Constants.GAME_OVER_LABEL_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.TEXT_CENTER_Y_OFFSET_LARGE);
+        font.draw(batch, "Press SPACE to restart", Constants.BOARD_X + Constants.RESTART_PROMPT_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.TEXT_CENTER_Y_OFFSET_SMALL);
         batch.end();
     }
 }

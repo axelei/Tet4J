@@ -74,10 +74,12 @@ public class Main extends ApplicationAdapter {
         shapes = new ShapeRenderer();
         FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Assets.file("fonts/ModernDOS8x16.ttf"));
         FreeTypeFontParameter param = new FreeTypeFontParameter();
-        param.size = Constants.FONT_SIZE;
+        param.size = Constants.FONT_SIZE * 4;
         font = fontGen.generateFont(param);
-        param.size = Constants.FONT_SIZE_BIG;
+        font.getData().setScale(0.25f);
+        param.size = Constants.FONT_SIZE_BIG * 4;
         bigFont = fontGen.generateFont(param);
+        bigFont.getData().setScale(0.25f);
         fontGen.dispose();
 
         sfxMove = Gdx.audio.newSound(Assets.file("sounds/move.wav"));
@@ -200,9 +202,9 @@ public class Main extends ApplicationAdapter {
             Gdx.gl.glDisable(GL20.GL_BLEND);
             batch.begin();
             bigFont.draw(batch, "Quit?",
-                Constants.BOARD_X + 70, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + 30);
+                Constants.BOARD_X + Constants.QUIT_PROMPT_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.TEXT_CENTER_Y_OFFSET_LARGE);
             font.draw(batch, "Y / N",
-                Constants.BOARD_X + 110, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f - 15);
+                Constants.BOARD_X + Constants.CONFIRM_PROMPT_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.TEXT_CENTER_Y_OFFSET_SMALL);
             batch.end();
         }
         if (musicManager.getToastTimer() >= 0) musicManager.drawToast(batch, font);

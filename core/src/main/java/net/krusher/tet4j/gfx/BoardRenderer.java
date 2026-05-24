@@ -77,7 +77,7 @@ public class BoardRenderer {
             batch.setColor(0, 0, 0, Constants.PAUSE_OVERLAY_ALPHA);
             batch.draw(pixel, Constants.BOARD_X, Constants.BOARD_Y, Constants.BOARD_PX_W, Constants.BOARD_PX_H);
             batch.setColor(1, 1, 1, 1);
-            bigFont.draw(batch, "PAUSED", Constants.BOARD_X + 40, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + 16);
+            bigFont.draw(batch, "PAUSED", Constants.BOARD_X + Constants.PAUSED_LABEL_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.PAUSED_LABEL_Y);
         }
         batch.end();
     }
@@ -89,7 +89,8 @@ public class BoardRenderer {
                 if (val > 0) {
                     batch.draw(blockTextures[val - 1],
                         Constants.BOARD_X + c * Constants.BLOCK_SIZE,
-                        Constants.BOARD_Y + (Constants.BOARD_VISIBLE_ROWS - 1 - (r - 2)) * Constants.BLOCK_SIZE);
+                        Constants.BOARD_Y + (Constants.BOARD_VISIBLE_ROWS - 1 - (r - 2)) * Constants.BLOCK_SIZE,
+                        Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);
                 }
             }
         }
@@ -106,7 +107,7 @@ public class BoardRenderer {
                     if (gr < 2) continue;
                     int screenR = Constants.BOARD_VISIBLE_ROWS - 1 - (gr - 2);
                     if (screenR < 0 || screenR >= Constants.BOARD_VISIBLE_ROWS) continue;
-                    batch.draw(tex, Constants.BOARD_X + gc * Constants.BLOCK_SIZE, Constants.BOARD_Y + screenR * Constants.BLOCK_SIZE);
+                    batch.draw(tex, Constants.BOARD_X + gc * Constants.BLOCK_SIZE, Constants.BOARD_Y + screenR * Constants.BLOCK_SIZE, Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);
                 }
             }
         }
@@ -144,7 +145,8 @@ public class BoardRenderer {
                 if (val == 0) continue;
                 batch.draw(blockTextures[val - 1],
                     Constants.BOARD_X + c * Constants.BLOCK_SIZE,
-                    Constants.BOARD_Y + (Constants.BOARD_VISIBLE_ROWS - 1 - (r - 2) - rowShift[r] * slideProgress) * Constants.BLOCK_SIZE);
+                    Constants.BOARD_Y + (Constants.BOARD_VISIBLE_ROWS - 1 - (r - 2) - rowShift[r] * slideProgress) * Constants.BLOCK_SIZE,
+                    Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);
             }
         }
     }
