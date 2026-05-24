@@ -15,6 +15,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import net.krusher.tet4j.audio.MusicManager;
 import net.krusher.tet4j.Assets;
+import net.krusher.tet4j.Settings;
 import net.krusher.tet4j.gfx.BackgroundManager;
 import net.krusher.tet4j.gfx.BoardRenderer;
 import net.krusher.tet4j.gfx.InfoPanel;
@@ -44,12 +45,21 @@ public class Main extends ApplicationAdapter {
     private InfoPanel infoPanel;
 
     private boolean showSplash = true;
+    private Settings settings;
 
     private float moveTimer, dropTimer;
     private int moveDir;
 
     @Override
     public void create() {
+        // Initialize settings
+        settings = new Settings();
+        
+        // Set up fullscreen mode if enabled
+        if (settings.isFullscreenEnabled()) {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        }
+        
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
 
@@ -82,9 +92,13 @@ public class Main extends ApplicationAdapter {
         board = new Board();
         particleSystem = new ParticleSystem(blockTextures);
         backgroundManager = new BackgroundManager();
-        musicManager = new MusicManager(pixel);
+        musicManager = new MusicManager(pixel, settings);
         boardRenderer = new BoardRenderer(blockTextures, ghostTexture, bgTexture, pixel);
         infoPanel = new InfoPanel(pixel);
+    }
+
+    private void playSfx(Sound sound) {
+        if (sound != null && settings.isSoundEffectsEnabled()) sound.play();
     }
 
     private void loadTextures() {
@@ -113,7 +127,7 @@ public class Main extends ApplicationAdapter {
             infoPanel.drawSplash(batch, splashTexture, bigFont);
             if (!musicManager.isTitlePlaying()) {
                 musicManager.playTitle();
-                if (musicManager.getTitleMusicMeta() != null) {
+                if (settings.isMusicEnabled() && musicManager.getTitleMusicMeta() != null) {
                     musicManager.setToast(musicManager.getTitleMusicMeta().title + "\n"
                         + musicManager.getTitleMusicMeta().artist + "\n"
                         + musicManager.getTitleMusicMeta().license);
@@ -138,19 +152,25 @@ public class Main extends ApplicationAdapter {
             return;
         }
 
+        handleInput(dt);
+        board.update(dt);
+
         if (board.justCleared) {
             int idx = Math.min(Math.max(board.linesCleared, 1), 4) - 1;
-            if (sfxClear[idx] != null) sfxClear[idx].play();
+            playSfx(sfxClear[idx]);
             board.justCleared = false;
             particleSystem.spawnClearingParticles(board);
         }
 
-        handleInput(dt);
-        board.update(dt);
-        if (board.justAutoDropped) {
-            if (sfxSoftDrop != null) sfxSoftDrop.play();
-            board.justAutoDropped = false;
+        if (board.justGameOver) {
+            playSfx(sfxGameOver);
+            board.justGameOver = false;
+            board.justLocked = false;
+        } else if (board.justLocked) {
+            playSfx(sfxSoftDrop);
+            board.justLocked = false;
         }
+
         particleSystem.update(dt);
         musicManager.updateGameplayMusic(board.state);
         backgroundManager.update(dt, board.level);
@@ -179,21 +199,21 @@ public class Main extends ApplicationAdapter {
                 board.reset();
                 particleSystem.clear();
                 backgroundManager.reset();
-                musicManager.pickNextGmTrack();
+                musicManager.selectNextTrack();
                 musicManager.playCurrentGm();
-                if (sfxDrop != null) sfxDrop.play();
+                playSfx(sfxDrop);
             }
             return;
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W)) {
             board.rotateCW();
-            if (sfxRotate != null) sfxRotate.play();
+            playSfx(sfxRotate);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             board.hardDrop();
-            if (sfxDrop != null) sfxDrop.play();
+            if (board.state == Board.State.PLAYING) playSfx(sfxDrop);
         }
 
         boolean softDropping = Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S);
@@ -216,7 +236,7 @@ public class Main extends ApplicationAdapter {
                 moveDir = dir;
                 moveTimer = 0;
                 if (dir < 0) board.moveLeft(); else board.moveRight();
-                if (sfxMove != null) sfxMove.play();
+                playSfx(sfxMove);
             } else {
                 moveTimer += dt;
                 if (moveTimer >= Constants.DAS_DELAY) {
@@ -224,7 +244,7 @@ public class Main extends ApplicationAdapter {
                     float repeat = moveTimer - Constants.DAS_DELAY;
                     int count = (int)(repeat / Constants.DAS_REPEAT);
                     int prevCount = (int)((repeat - dt) / Constants.DAS_REPEAT);
-                    if (count > prevCount && sfxMove != null) sfxMove.play();
+                    if (count > prevCount) playSfx(sfxMove);
                 }
             }
         } else {

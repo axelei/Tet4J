@@ -20,7 +20,8 @@ public class Board {
     public boolean cheatMode;
 
     public boolean justCleared;
-    public boolean justAutoDropped;
+    public boolean justLocked;
+    public boolean justGameOver;
     public boolean[] clearedRows = new boolean[Constants.BOARD_ROWS];
     public int linesCleared;
     public float clearTimer;
@@ -58,6 +59,7 @@ public class Board {
         if (!canPlace(currentType, currentRotation, currentX, currentY)) {
             gameOver = true;
             state = State.GAME_OVER;
+            justGameOver = true;
         }
     }
 
@@ -77,6 +79,7 @@ public class Board {
     }
 
     public void lockPiece() {
+        justLocked = true;
         int[][] shape = Tetromino.getShape(currentType, currentRotation);
         for (int r = 0; r < 4; r++) {
             for (int c = 0; c < 4; c++) {
@@ -103,11 +106,11 @@ public class Board {
             }
         }
 
-        if (linesCleared > 0) {
+         if (linesCleared > 0) {
             state = State.CLEARING;
             justCleared = true;
             clearTimer = 0;
-        } else {
+         } else {
             spawnPiece();
         }
     }
@@ -128,10 +131,9 @@ public class Board {
             dropTimer -= dropInterval;
             if (canPlace(currentType, currentRotation, currentX, currentY + 1)) {
                 currentY++;
-                justAutoDropped = true;
             } else {
-                lockPiece();
-            }
+            lockPiece();
+        }
         }
     }
 
@@ -208,6 +210,7 @@ public class Board {
         }
         score += dropped * 2;
         lockPiece();
+        justLocked = false;
     }
 
     public int getGhostY() {

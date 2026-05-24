@@ -10,8 +10,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.files.FileHandle;
 import net.krusher.tet4j.Board;
 import net.krusher.tet4j.Constants;
+import net.krusher.tet4j.Settings;
 import net.krusher.tet4j.audio.MusicMetadata;
-
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 public class MusicManager {
+    private final Settings settings;
+
     private final Music titleMusic;
     private final MusicMetadata titleMusicMeta;
+
     private final List<Music> gameplayMusic = new ArrayList<>();
     private final Map<Music, MusicMetadata> musicMeta = new HashMap<>();
     private Music currentGm;
@@ -30,8 +33,9 @@ public class MusicManager {
     private final GlyphLayout glyphLayout = new GlyphLayout();
     private final Texture pixel;
 
-    public MusicManager(Texture pixel) {
+    public MusicManager(Texture pixel, Settings settings) {
         this.pixel = pixel;
+        this.settings = settings;
 
         // Load title music by enumerating files at runtime
         Music foundTitle = null;
@@ -60,7 +64,7 @@ public class MusicManager {
                 }
             }
         }
-        pickNextGmTrack();
+        selectNextTrack();
     }
 
     public Music getTitleMusic() {
@@ -75,12 +79,74 @@ public class MusicManager {
         return titleMusic != null && titleMusic.isPlaying();
     }
 
+    // --- Music control ---
+
+    private void playMusic(Music music) {
+        if (music != null && settings.isMusicEnabled()) music.play();
+    }
+
     public void playTitle() {
-        if (titleMusic != null) titleMusic.play();
+        playMusic(titleMusic);
     }
 
     public void stopTitle() {
         if (titleMusic != null) titleMusic.stop();
+    }
+
+    public void playCurrentGm() {
+        if (currentGm == null) return;
+        showTrackToast(currentGm);
+        playMusic(currentGm);
+    }
+
+    /** Selects a random track (different from previous) and shows its toast. Does NOT play. */
+    public void selectNextTrack() {
+        if (currentGm != null) currentGm.stop();
+        if (gameplayMusic.isEmpty()) { currentGm = null; return; }
+
+        Music previousTrack = currentGm;
+        if (gameplayMusic.size() == 1) {
+            currentGm = gameplayMusic.get(0);
+        } else {
+            do {
+                currentGm = gameplayMusic.get((int)(Math.random() * gameplayMusic.size()));
+            } while (currentGm == previousTrack);
+        }
+
+        showTrackToast(currentGm);
+    }
+
+    /** Plays the current track if music is enabled, otherwise stops any playing track. */
+    private void ensureTrackPlaying() {
+        if (currentGm == null) return;
+        if (settings.isMusicEnabled()) {
+            currentGm.setVolume(Constants.GM_VOLUME);
+            if (!currentGm.isPlaying()) {
+                selectNextTrack();
+                playMusic(currentGm);
+            }
+        } else if (currentGm.isPlaying()) {
+            currentGm.stop();
+        }
+    }
+
+    public void updateGameplayMusic(Board.State state) {
+        if (state == Board.State.GAME_OVER) {
+            if (currentGm != null && currentGm.isPlaying()) currentGm.stop();
+        } else if (state == Board.State.PLAYING) {
+            if (currentGm == null) return;
+            ensureTrackPlaying();
+        } else if (state == Board.State.PAUSED) {
+            if (currentGm != null) currentGm.setVolume(Constants.GM_VOLUME_PAUSED);
+        }
+    }
+
+    // --- Toast ---
+
+    private void showTrackToast(Music track) {
+        if (!settings.isMusicEnabled()) return;
+        MusicMetadata meta = musicMeta.get(track);
+        if (meta != null) setToast(meta.title + "\n" + meta.artist + "\n" + meta.license);
     }
 
     public String getToastText() {
@@ -91,48 +157,16 @@ public class MusicManager {
         return toastTimer;
     }
 
-    public void updateToast(float dt) {
-        if (toastTimer >= 0) {
-            toastTimer += dt;
-            if (toastTimer > Constants.TOAST_DURATION) toastTimer = -1;
-        }
-    }
-
     public void setToast(String text) {
         toastText = text;
         toastTimer = 0;
     }
 
-    public void updateGameplayMusic(Board.State state) {
-        if (state == Board.State.GAME_OVER) {
-            if (currentGm != null && currentGm.isPlaying()) currentGm.stop();
-        } else if (state == Board.State.PLAYING) {
-            if (currentGm != null) {
-                currentGm.setVolume(Constants.GM_VOLUME);
-                if (!currentGm.isPlaying()) {
-                    pickNextGmTrack();
-                    if (currentGm != null) currentGm.play();
-                }
-            }
-        } else if (state == Board.State.PAUSED) {
-            if (currentGm != null) currentGm.setVolume(Constants.GM_VOLUME_PAUSED);
+    public void updateToast(float dt) {
+        if (toastTimer >= 0) {
+            toastTimer += dt;
+            if (toastTimer > Constants.TOAST_DURATION) toastTimer = -1;
         }
-    }
-
-    public void playCurrentGm() {
-        if (currentGm != null) {
-            MusicMetadata meta = musicMeta.get(currentGm);
-            if (meta != null) setToast(meta.title + "\n" + meta.artist + "\n" + meta.license);
-            currentGm.play();
-        }
-    }
-
-    public void pickNextGmTrack() {
-        if (currentGm != null) currentGm.stop();
-        if (gameplayMusic.isEmpty()) { currentGm = null; return; }
-        currentGm = gameplayMusic.get((int)(Math.random() * gameplayMusic.size()));
-        MusicMetadata meta = musicMeta.get(currentGm);
-        if (meta != null) setToast(meta.title + "\n" + meta.artist + "\n" + meta.license);
     }
 
     public void drawToast(SpriteBatch batch, BitmapFont font) {
