@@ -49,6 +49,7 @@ public class Main extends ApplicationAdapter {
 
     private float moveTimer, dropTimer;
     private int moveDir;
+    private boolean askingExit;
 
     @Override
     public void create() {
@@ -177,14 +178,53 @@ public class Main extends ApplicationAdapter {
 
         backgroundManager.draw(batch);
         boardRenderer.drawBoardBackground(shapes);
-        boardRenderer.drawGame(batch, bigFont, board, particleSystem, infoPanel, font);
+        boardRenderer.drawGame(batch, bigFont, board, particleSystem, infoPanel, font, askingExit);
         if (board.state == Board.State.GAME_OVER) {
             infoPanel.drawGameOver(batch, shapes, board, bigFont, font);
+        } else if (askingExit) {
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            shapes.begin(ShapeRenderer.ShapeType.Filled);
+            shapes.setColor(0, 0, 0, Constants.PAUSE_OVERLAY_ALPHA);
+            shapes.rect(Constants.BOARD_X, Constants.BOARD_Y, Constants.BOARD_PX_W, Constants.BOARD_PX_H);
+            shapes.end();
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+            batch.begin();
+            bigFont.draw(batch, "Quit?",
+                Constants.BOARD_X + 70, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + 30);
+            font.draw(batch, "Y / N",
+                Constants.BOARD_X + 110, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f - 15);
+            batch.end();
         }
         if (musicManager.getToastTimer() >= 0) musicManager.drawToast(batch, font);
     }
 
     private void handleInput(float dt) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (board.state == Board.State.PLAYING) {
+                board.state = Board.State.PAUSED;
+                askingExit = true;
+            } else if (board.state == Board.State.PAUSED) {
+                if (askingExit) {
+                    board.state = Board.State.PLAYING;
+                    askingExit = false;
+                } else {
+                    askingExit = true;
+                }
+            }
+        }
+
+        if (askingExit) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.Y)) {
+                Gdx.app.exit();
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
+                board.state = Board.State.PLAYING;
+                askingExit = false;
+            }
+            return;
+        }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             if (board.state == Board.State.PLAYING) {
                 board.state = Board.State.PAUSED;

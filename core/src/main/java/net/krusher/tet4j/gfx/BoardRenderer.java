@@ -34,7 +34,7 @@ public class BoardRenderer {
         shapes.end();
     }
 
-    public void drawGame(SpriteBatch batch, BitmapFont bigFont, Board board, ParticleSystem particles, InfoPanel infoPanel, BitmapFont font) {
+    public void drawGame(SpriteBatch batch, BitmapFont bigFont, Board board, ParticleSystem particles, InfoPanel infoPanel, BitmapFont font, boolean askingExit) {
         batch.begin();
         batch.draw(bgTexture, Constants.BOARD_X, Constants.BOARD_Y);
 
@@ -49,7 +49,7 @@ public class BoardRenderer {
 
         infoPanel.drawPreview(batch, font, board, blockTextures);
         infoPanel.drawUI(batch, font, board);
-        if (board.state == Board.State.PAUSED) {
+        if (board.state == Board.State.PAUSED && !askingExit) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             batch.setColor(0, 0, 0, Constants.PAUSE_OVERLAY_ALPHA);

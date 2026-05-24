@@ -1,53 +1,109 @@
 package net.krusher.tet4j.gfx;
 
 import com.badlogic.gdx.Gdx;
-import net.krusher.tet4j.Assets;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Constants;
 
 public class BackgroundManager {
-    private final Texture[] levelBgTextures;
-    private final Texture[] masterBgTextures;
-    private Texture currentBgTex, prevBgTex;
+    private Texture currentBgTex;
+    private Texture prevBgTex;
     private float bgFadeTimer = -1;
     private int prevLevel = -1;
+    private final Color tintColor = new Color(1, 1, 1, 1);
+    private float currentLuminosity;
 
     public BackgroundManager() {
-        levelBgTextures = new Texture[Constants.NUM_LEVEL_BG];
-        for (int i = 0; i < Constants.NUM_LEVEL_BG; i++) {
-            levelBgTextures[i] = new Texture(Assets.file("backgrounds/level" + (i + 1) + ".jpg"));
-        }
-        java.util.List<Texture> masterList = new java.util.ArrayList<>();
+        currentBgTex = loadLevelTexture(0);
+    }
+
+    private Texture loadLevelTexture(int level) {
+        return loadTexture(Assets.file("backgrounds/level" + (level + 1) + ".jpg"));
+    }
+
+    private Texture loadMasterTexture() {
+        java.util.ArrayList<com.badlogic.gdx.files.FileHandle> masters = new java.util.ArrayList<>();
         for (com.badlogic.gdx.files.FileHandle f : Assets.file("backgrounds/master").list()) {
             String n = f.name().toLowerCase();
-            if (n.endsWith(".jpg") || n.endsWith(".png")) masterList.add(new Texture(f));
+            if (n.endsWith(".jpg") || n.endsWith(".png")) masters.add(f);
         }
-        masterBgTextures = masterList.toArray(new Texture[0]);
-        currentBgTex = levelBgTextures[0];
+        if (masters.isEmpty()) return loadLevelTexture(0);
+        com.badlogic.gdx.files.FileHandle chosen = masters.get((int) (Math.random() * masters.size()));
+        return loadTexture(chosen);
+    }
+
+    private Texture loadTexture(com.badlogic.gdx.files.FileHandle file) {
+        Pixmap pm = new Pixmap(file);
+        currentLuminosity = computeLuminosity(pm);
+        Texture tex = new Texture(pm);
+        pm.dispose();
+        return tex;
+    }
+
+    private static float computeLuminosity(Pixmap pm) {
+        int total = 0, count = 0;
+        int w = pm.getWidth(), h = pm.getHeight();
+        for (int y = 0; y < h; y += 4) {
+            for (int x = 0; x < w; x += 4) {
+                int px = pm.getPixel(x, y);
+                total += (int)(0.2126f * ((px >> 24) & 0xFF)
+                             + 0.7152f * ((px >> 16) & 0xFF)
+                             + 0.0722f * ((px >> 8) & 0xFF));
+                count++;
+            }
+        }
+        return count > 0 ? (float) total / count / 255f : 0.5f;
     }
 
     public void update(float dt, int level) {
+        if (bgFadeTimer >= 0) {
+            bgFadeTimer += dt;
+            if (bgFadeTimer >= Constants.BG_FADE_DURATION) {
+                bgFadeTimer = -1;
+                if (prevBgTex != null) {
+                    prevBgTex.dispose();
+                    prevBgTex = null;
+                }
+            }
+        }
+
         if (level == prevLevel) return;
         prevLevel = level;
 
-        Texture tex;
-        if (level < Constants.NUM_LEVEL_BG) {
-            tex = levelBgTextures[level];
-        } else {
-            tex = masterBgTextures[(int)(Math.random() * masterBgTextures.length)];
+        if (prevBgTex != null) {
+            prevBgTex.dispose();
+            prevBgTex = null;
         }
 
-        if (tex != currentBgTex) {
-            prevBgTex = currentBgTex;
-            currentBgTex = tex;
-            bgFadeTimer = 0;
-        }
-        if (bgFadeTimer >= 0) {
-            bgFadeTimer += dt;
-            if (bgFadeTimer >= Constants.BG_FADE_DURATION) bgFadeTimer = -1;
-        }
+        Texture newTex = level < Constants.NUM_LEVEL_BG ? loadLevelTexture(level) : loadMasterTexture();
+        prevBgTex = currentBgTex;
+        currentBgTex = newTex;
+        bgFadeTimer = 0;
+        generateTint();
+    }
+
+    private void generateTint() {
+        float h = (float) Math.random() * 360f;
+        float l = Math.max(0.12f, Math.min(0.40f, 0.38f - currentLuminosity * 0.20f));
+        hslToRgb(h, 1f, l, tintColor);
+    }
+
+    private static void hslToRgb(float h, float s, float l, Color out) {
+        float c = (1f - Math.abs(2f * l - 1f)) * s;
+        float x = c * (1f - Math.abs((h / 60f) % 2f - 1f));
+        float m = l - c / 2f;
+        float r, g, b;
+        if (h < 60) { r = c; g = x; b = 0; }
+        else if (h < 120) { r = x; g = c; b = 0; }
+        else if (h < 180) { r = 0; g = c; b = x; }
+        else if (h < 240) { r = 0; g = x; b = c; }
+        else if (h < 300) { r = x; g = 0; b = c; }
+        else { r = c; g = 0; b = x; }
+        out.set(r + m, g + m, b + m, 1f);
     }
 
     public void draw(SpriteBatch batch) {
@@ -59,7 +115,9 @@ public class BackgroundManager {
             float alpha = bgFadeTimer / Constants.BG_FADE_DURATION;
             batch.setColor(1, 1, 1, 1 - alpha);
             batch.draw(prevBgTex, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
-            batch.setColor(1, 1, 1, alpha);
+            batch.setColor(tintColor.r, tintColor.g, tintColor.b, alpha);
+        } else {
+            batch.setColor(tintColor);
         }
         batch.draw(currentBgTex, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
         batch.setColor(1, 1, 1, 1);
@@ -70,13 +128,15 @@ public class BackgroundManager {
 
     public void reset() {
         prevLevel = -1;
-        currentBgTex = levelBgTextures[0];
-        prevBgTex = null;
+        if (prevBgTex != null) { prevBgTex.dispose(); prevBgTex = null; }
+        if (currentBgTex != null) { currentBgTex.dispose(); currentBgTex = null; }
+        currentBgTex = loadLevelTexture(0);
+        generateTint();
         bgFadeTimer = -1;
     }
 
     public void dispose() {
-        for (Texture t : levelBgTextures) if (t != null) t.dispose();
-        for (Texture t : masterBgTextures) if (t != null) t.dispose();
+        if (currentBgTex != null) { currentBgTex.dispose(); currentBgTex = null; }
+        if (prevBgTex != null) { prevBgTex.dispose(); prevBgTex = null; }
     }
 }

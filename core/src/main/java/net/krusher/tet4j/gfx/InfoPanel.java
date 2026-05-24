@@ -72,6 +72,8 @@ public class InfoPanel {
         font.draw(batch, "SPACE: Hard Drop", Constants.INFO_X, 60);
         drawTextBg(batch, font, "P: Pause", Constants.INFO_X, 42);
         font.draw(batch, "P: Pause", Constants.INFO_X, 42);
+        drawTextBg(batch, font, "ESC: Exit", Constants.INFO_X, 24);
+        font.draw(batch, "ESC: Exit", Constants.INFO_X, 24);
         if (board.cheatMode) {
             drawTextBg(batch, font, "CHEATER!!", Constants.INFO_X, 24);
             font.draw(batch, "CHEATER!!", Constants.INFO_X, 24);
