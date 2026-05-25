@@ -165,4 +165,4 @@ Thumbs.db
 
 # Generated
 util/build
-settings.properties
+*.log

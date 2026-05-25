@@ -33,9 +33,7 @@ public class Board {
     private float dropInterval = Constants.INITIAL_DROP_INTERVAL;
 
     public Board() {
-        fillBag();
-        nextType = drawFromBag();
-        spawnPiece();
+        reset();
     }
 
     private void fillBag() {
@@ -153,11 +151,18 @@ public class Board {
         }
     }
 
+    private float dropIntervalForLevel(int level) {
+        float t = (Math.max(level, 1) - 1) / 29f;
+        t = (float)Math.log(1 + t * (Math.E - 1));
+        return Constants.INITIAL_DROP_INTERVAL
+            - (Constants.INITIAL_DROP_INTERVAL - Constants.SOFT_DROP_INTERVAL) * t;
+    }
+
     private void finishClearing() {
         lines += linesCleared;
         level = lines / Constants.LINES_PER_LEVEL;
-        score += Constants.SCORE_TABLE[Math.min(linesCleared, 4)] * Math.max(1, level);
-        dropInterval = Math.max(Constants.MIN_DROP_INTERVAL, Constants.INITIAL_DROP_INTERVAL - level * Constants.DROP_INTERVAL_DECAY);
+        score += (int)(Constants.SCORE_TABLE[Math.min(linesCleared, 4)] * Math.max(1, Math.pow(level, 1.1)));
+        dropInterval = dropIntervalForLevel(level);
 
         Block[][] newGrid = new Block[Constants.BOARD_ROWS][Constants.BOARD_COLS];
         int writeRow = Constants.BOARD_ROWS - 1;
@@ -245,11 +250,11 @@ public class Board {
             Arrays.fill(fallDelays[r], 0f);
         }
         score = 0;
-        lines = 0;
-        level = 0;
+        lines = Constants.STARTING_LEVEL * Constants.LINES_PER_LEVEL;
+        level = Constants.STARTING_LEVEL;
         gameOver = false;
         state = State.PLAYING;
-        dropInterval = Constants.INITIAL_DROP_INTERVAL;
+        dropInterval = dropIntervalForLevel(level);
         dropTimer = 0;
         Arrays.fill(clearedRows, false);
         linesCleared = 0;

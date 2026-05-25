@@ -28,11 +28,10 @@ public class Constants {
     public static final int FONT_SIZE_BIG = 72;
 
     public static final int SPAWN_X = 3;
+    public static final int STARTING_LEVEL = 0;
 
     public static final int LINES_PER_LEVEL = 10;
     public static final float INITIAL_DROP_INTERVAL = 1f;
-    public static final float MIN_DROP_INTERVAL = 0.05f;
-    public static final float DROP_INTERVAL_DECAY = 0.03167f;
     public static final float SOFT_DROP_INTERVAL = 0.05f;
     public static final float DAS_DELAY = 0.17f;
     public static final float DAS_REPEAT = 0.05f;
@@ -40,7 +39,7 @@ public class Constants {
 
     public static final int ROTATION_MASK = 3;
 
-    public static final int[] SCORE_TABLE = {0, 100, 300, 500, 800};
+    public static final int[] SCORE_TABLE = {0, 100, 450, 2000, 8000};
 
     public static final float CLEAR_DURATION = 0.5f;
     public static final float CLEARING_SLIDE_START = 0.35f;
@@ -72,8 +71,7 @@ public class Constants {
 
     public static final int NUM_LEVEL_BG = 10;
     public static final float BG_FADE_DURATION = 0.8f;
-    public static final int BG_SPLASH_DRAW_W = 1920;
-    public static final int BG_SPLASH_DRAW_H = 1080;
+    public static final float BG_TINT_STRENGTH = 0.6f;
 
     public static final float BG_OPACITY = 0.75f;
     public static final float PAUSE_OVERLAY_ALPHA = 0.6f;
@@ -90,8 +88,6 @@ public class Constants {
     public static final int INFO_VALUE_LABEL_GAP = 57;
     public static final int INFO_KEY_LABEL_FIRST = 180;
     public static final int INFO_KEY_LABEL_STEP = 45;
-
-    public static final Color SPLASH_TEXT_COLOR = Color.WHITE;
 
     public static final int QUIT_PROMPT_X = 105;
     public static final int CONFIRM_PROMPT_X = 165;

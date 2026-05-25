@@ -199,7 +199,7 @@ public class Main extends ApplicationAdapter {
                 (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER))) {
                 board.reset();
                 particleSystem.clear();
-                backgroundManager.reset();
+                backgroundManager.reset(Constants.STARTING_LEVEL);
                 musicManager.selectNextTrack();
                 musicManager.playCurrentGm();
                 playSfx(Assets.sfxDrop);

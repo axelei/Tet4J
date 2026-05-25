@@ -18,7 +18,10 @@ public class BackgroundManager {
     private float currentLuminosity;
 
     public BackgroundManager() {
-        currentBgTex = loadLevelTexture(0);
+        prevLevel = Constants.STARTING_LEVEL;
+        currentBgTex = Constants.STARTING_LEVEL < Constants.NUM_LEVEL_BG
+            ? loadLevelTexture(Constants.STARTING_LEVEL)
+            : loadMasterTexture();
     }
 
     private Texture loadLevelTexture(int level) {
@@ -115,22 +118,29 @@ public class BackgroundManager {
             float alpha = bgFadeTimer / Constants.BG_FADE_DURATION;
             batch.setColor(1, 1, 1, 1 - alpha);
             batch.draw(prevBgTex, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
-            batch.setColor(tintColor.r, tintColor.g, tintColor.b, alpha);
+
+            batch.setColor(1, 1, 1, alpha);
+            batch.draw(currentBgTex, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+
+            batch.setColor(tintColor.r, tintColor.g, tintColor.b, alpha * Constants.BG_TINT_STRENGTH);
+            batch.draw(Assets.pixel, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
         } else {
-            batch.setColor(tintColor);
+            batch.setColor(1, 1, 1, 1);
+            batch.draw(currentBgTex, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+            batch.setColor(tintColor.r, tintColor.g, tintColor.b, Constants.BG_TINT_STRENGTH);
+            batch.draw(Assets.pixel, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
         }
-        batch.draw(currentBgTex, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
         batch.setColor(1, 1, 1, 1);
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
         batch.end();
     }
 
-    public void reset() {
-        prevLevel = -1;
+    public void reset(int level) {
+        prevLevel = level;
         if (prevBgTex != null) { prevBgTex.dispose(); prevBgTex = null; }
         if (currentBgTex != null) { currentBgTex.dispose(); currentBgTex = null; }
-        currentBgTex = loadLevelTexture(0);
+        currentBgTex = level < Constants.NUM_LEVEL_BG ? loadLevelTexture(level) : loadMasterTexture();
         generateTint();
         bgFadeTimer = -1;
     }
