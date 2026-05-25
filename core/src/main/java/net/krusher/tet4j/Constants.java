@@ -36,6 +36,7 @@ public class Constants {
     public static final float SOFT_DROP_INTERVAL = 0.05f;
     public static final float DAS_DELAY = 0.17f;
     public static final float DAS_REPEAT = 0.05f;
+    public static final float PIECE_SLIDE_SPEED = 24f;
 
     public static final int ROTATION_MASK = 3;
 
@@ -43,6 +44,7 @@ public class Constants {
 
     public static final float CLEAR_DURATION = 0.5f;
     public static final float CLEARING_SLIDE_START = 0.35f;
+    public static final float CLEAR_FALL_DELAY_MAX = 0.2f;
 
     public static final float PARTICLE_GRAVITY = 1200;
     public static final float PARTICLE_SPEED_MIN = 450;

@@ -15,6 +15,7 @@ public class Assets {
     public static Texture[] blockTextures;
     public static Texture ghostTexture;
     public static Texture bgTexture;
+    public static Texture relief;
 
     public static BitmapFont font;
     public static BitmapFont bigFont;
@@ -53,6 +54,7 @@ public class Assets {
         }
         ghostTexture = new Texture(file("graphics/ghost.png"));
         bgTexture = new Texture(file("graphics/bg.png"));
+        relief = new Texture(file("graphics/relief.png"));
 
         Pixmap pm = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pm.setColor(1, 1, 1, 1);
@@ -69,6 +71,7 @@ public class Assets {
         if (blockTextures != null) for (Texture t : blockTextures) if (t != null) t.dispose();
         if (ghostTexture != null) ghostTexture.dispose();
         if (bgTexture != null) bgTexture.dispose();
+        if (relief != null) relief.dispose();
         if (splashTexture != null) splashTexture.dispose();
         if (pixel != null) pixel.dispose();
         if (sfxMove != null) sfxMove.dispose();

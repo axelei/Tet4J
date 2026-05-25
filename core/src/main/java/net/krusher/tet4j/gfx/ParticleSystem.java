@@ -1,8 +1,8 @@
 package net.krusher.tet4j.gfx;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import net.krusher.tet4j.Assets;
+import net.krusher.tet4j.Block;
 import net.krusher.tet4j.Board;
 import net.krusher.tet4j.Constants;
 
@@ -20,19 +20,9 @@ public class ParticleSystem {
         for (int r = 2; r < Constants.BOARD_ROWS; r++) {
             if (!board.clearedRows[r]) continue;
             for (int c = 0; c < Constants.BOARD_COLS; c++) {
-                int val = board.grid[r][c];
-                if (val == 0) continue;
-                Particle p = new Particle();
-                p.x = Constants.BOARD_X + c * Constants.BLOCK_SIZE;
-                p.y = Constants.BOARD_Y + (Constants.BOARD_VISIBLE_ROWS - 1 - (r - 2)) * Constants.BLOCK_SIZE;
-                float angle = Constants.PARTICLE_ANGLE_MIN + (float)(Math.random() * Constants.PARTICLE_ANGLE_RANGE);
-                float speed = Constants.PARTICLE_SPEED_MIN + (float)(Math.random() * (Constants.PARTICLE_SPEED_MAX - Constants.PARTICLE_SPEED_MIN));
-                p.vx = (float)Math.cos(angle) * speed;
-                p.vy = (float)Math.sin(angle) * speed;
-                p.rotation = (float)(Math.random() * Constants.PARTICLE_ROTATION_MAX);
-                p.rotSpeed = (float)(Math.random() * Constants.PARTICLE_ROT_SPEED_MAX * 2 - Constants.PARTICLE_ROT_SPEED_MAX);
-                p.texture = Assets.blockTextures[val - 1];
-                particles.add(p);
+                Block block = board.grid[r][c];
+                if (block == null) continue;
+                particles.add(new Particle(block, c, r));
             }
         }
     }
@@ -57,6 +47,8 @@ public class ParticleSystem {
             batch.setColor(1, 1, 1, a);
             batch.draw(p.texture, p.x, p.y, Constants.BLOCK_SIZE / 2f, Constants.BLOCK_SIZE / 2f,
                 Constants.BLOCK_SIZE, Constants.BLOCK_SIZE, 1, 1, p.rotation, 0, 0, Constants.BLOCK_SIZE, Constants.BLOCK_SIZE, false, false);
+            batch.draw(Assets.relief, p.x, p.y, Constants.BLOCK_SIZE / 2f, Constants.BLOCK_SIZE / 2f,
+                Constants.BLOCK_SIZE, Constants.BLOCK_SIZE, 1, 1, p.rotation, 0, 0, Assets.relief.getWidth(), Assets.relief.getHeight(), false, false);
         }
         batch.setColor(1, 1, 1, 1);
     }
@@ -67,11 +59,5 @@ public class ParticleSystem {
 
     public boolean isEmpty() {
         return particles.isEmpty();
-    }
-
-    private static class Particle {
-        float x, y, vx, vy, rotation, rotSpeed;
-        Texture texture;
-        float age;
     }
 }

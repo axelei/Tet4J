@@ -57,6 +57,7 @@ public class InfoPanel {
                         1, 1, rot,
                         0, 0, tex.getWidth(), tex.getHeight(),
                         false, false);
+                    batch.draw(Assets.relief, baseX + c * ps, py - r * ps, ps, ps);
                 }
             }
         }

@@ -10,9 +10,10 @@ import net.krusher.tet4j.Tetromino.Type;
 public class Board {
     public enum State { PLAYING, CLEARING, GAME_OVER, PAUSED }
 
-    public int[][] grid = new int[Constants.BOARD_ROWS][Constants.BOARD_COLS];
+    public Block[][] grid = new Block[Constants.BOARD_ROWS][Constants.BOARD_COLS];
     public Type currentType;
     public int currentX, currentY, currentRotation;
+    public float visualX, visualY;
     public Type nextType;
     public int score, lines, level;
     public boolean gameOver;
@@ -25,6 +26,7 @@ public class Board {
     public boolean[] clearedRows = new boolean[Constants.BOARD_ROWS];
     public int linesCleared;
     public float clearTimer;
+    public float[][] fallDelays = new float[Constants.BOARD_ROWS][Constants.BOARD_COLS];
 
     private List<Type> bag = new ArrayList<>();
     private float dropTimer;
@@ -54,6 +56,8 @@ public class Board {
         currentX = Constants.SPAWN_X;
         currentY = 0;
         currentRotation = 0;
+        visualX = currentX;
+        visualY = currentY;
         dropTimer = 0;
 
         if (!canPlace(currentType, currentRotation, currentX, currentY)) {
@@ -71,7 +75,7 @@ public class Board {
                     int gr = y + r;
                     int gc = x + c;
                     if (gc < 0 || gc >= Constants.BOARD_COLS || gr < 0 || gr >= Constants.BOARD_ROWS) return false;
-                    if (grid[gr][gc] != 0) return false;
+                    if (grid[gr][gc] != null) return false;
                 }
             }
         }
@@ -87,7 +91,7 @@ public class Board {
                     int gr = currentY + r;
                     int gc = currentX + c;
                     if (gr >= 0 && gr < Constants.BOARD_ROWS && gc >= 0 && gc < Constants.BOARD_COLS) {
-                        grid[gr][gc] = currentType.ordinal() + 1;
+                        grid[gr][gc] = new Block(Assets.blockTextures[currentType.ordinal()], currentRotation);
                     }
                 }
             }
@@ -98,7 +102,7 @@ public class Board {
         for (int r = Constants.BOARD_ROWS - 1; r >= 0; r--) {
             boolean full = true;
             for (int c = 0; c < Constants.BOARD_COLS; c++) {
-                if (grid[r][c] == 0) { full = false; break; }
+                if (grid[r][c] == null) { full = false; break; }
             }
             if (full) {
                 clearedRows[r] = true;
@@ -110,6 +114,16 @@ public class Board {
             state = State.CLEARING;
             justCleared = true;
             clearTimer = 0;
+            for (int r = 0; r < Constants.BOARD_ROWS; r++)
+                Arrays.fill(fallDelays[r], 0f);
+            int shifted = 0;
+            for (int r = Constants.BOARD_ROWS - 1; r >= 0; r--) {
+                if (clearedRows[r]) { shifted++; continue; }
+                for (int c = 0; c < Constants.BOARD_COLS; c++) {
+                    if (grid[r][c] != null)
+                        fallDelays[r][c] = (float)Math.random() * Constants.CLEAR_FALL_DELAY_MAX;
+                }
+            }
          } else {
             spawnPiece();
         }
@@ -120,12 +134,14 @@ public class Board {
 
         if (state == State.CLEARING) {
             clearTimer += delta;
-            if (clearTimer >= Constants.CLEAR_DURATION) {
+            if (clearTimer >= Constants.CLEAR_DURATION + Constants.CLEAR_FALL_DELAY_MAX) {
                 finishClearing();
             }
             return;
         }
 
+        visualX += (currentX - visualX) * Math.min(1, Constants.PIECE_SLIDE_SPEED * delta);
+        visualY += (currentY - visualY) * Math.min(1, Constants.PIECE_SLIDE_SPEED * delta);
         dropTimer += delta;
         if (dropTimer >= dropInterval) {
             dropTimer -= dropInterval;
@@ -143,7 +159,7 @@ public class Board {
         score += Constants.SCORE_TABLE[Math.min(linesCleared, 4)] * Math.max(1, level);
         dropInterval = Math.max(Constants.MIN_DROP_INTERVAL, Constants.INITIAL_DROP_INTERVAL - level * Constants.DROP_INTERVAL_DECAY);
 
-        int[][] newGrid = new int[Constants.BOARD_ROWS][Constants.BOARD_COLS];
+        Block[][] newGrid = new Block[Constants.BOARD_ROWS][Constants.BOARD_COLS];
         int writeRow = Constants.BOARD_ROWS - 1;
         for (int r = Constants.BOARD_ROWS - 1; r >= 0; r--) {
             if (!clearedRows[r]) {
@@ -153,6 +169,8 @@ public class Board {
         }
         grid = newGrid;
 
+        for (int r = 0; r < Constants.BOARD_ROWS; r++)
+            Arrays.fill(fallDelays[r], 0f);
         Arrays.fill(clearedRows, false);
         linesCleared = 0;
         state = State.PLAYING;
@@ -221,9 +239,11 @@ public class Board {
     }
 
     public void reset() {
-        for (int r = 0; r < Constants.BOARD_ROWS; r++)
+        for (int r = 0; r < Constants.BOARD_ROWS; r++) {
             for (int c = 0; c < Constants.BOARD_COLS; c++)
-                grid[r][c] = 0;
+                grid[r][c] = null;
+            Arrays.fill(fallDelays[r], 0f);
+        }
         score = 0;
         lines = 0;
         level = 0;
