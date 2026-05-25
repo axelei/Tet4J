@@ -3,7 +3,6 @@ package net.krusher.tet4j.audio;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import net.krusher.tet4j.Assets;
@@ -30,8 +29,8 @@ public class MusicManager {
 
     private final Toast toast;
 
-    public MusicManager(Texture pixel, Settings settings) {
-        toast = new Toast(pixel);
+    public MusicManager(Settings settings) {
+        toast = new Toast();
         this.settings = settings;
 
         // Load title music by enumerating files at runtime

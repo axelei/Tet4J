@@ -1,19 +1,17 @@
 package net.krusher.tet4j.gfx;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Constants;
 
 public class Toast {
     private final GlyphLayout glyphLayout = new GlyphLayout();
-    private final Texture pixel;
     private String text;
     private float timer = -1;
 
-    public Toast(Texture pixel) {
-        this.pixel = pixel;
+    public Toast() {
     }
 
     public String getText() {
@@ -62,7 +60,7 @@ public class Toast {
         float ty = Constants.TOAST_MARGIN_Y + th + yOffset;
 
         batch.setColor(0, 0, 0, Constants.TOAST_BG_ALPHA * alpha);
-        batch.draw(pixel, tx, ty - th, Constants.TOAST_MAX_WIDTH, th);
+        batch.draw(Assets.pixel, tx, ty - th, Constants.TOAST_MAX_WIDTH, th);
         batch.setColor(1, 1, 1, alpha);
         font.draw(batch, glyphLayout, tx + Constants.TOAST_PAD_X, ty - Constants.TOAST_PAD_Y);
         batch.setColor(1, 1, 1, 1);

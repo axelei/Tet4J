@@ -8,17 +8,16 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Board;
 import net.krusher.tet4j.Constants;
 import net.krusher.tet4j.Tetromino;
 
 public class InfoPanel {
     private final GlyphLayout glyphLayout = new GlyphLayout();
-    private final Texture pixel;
     private float swingTimer;
 
-    public InfoPanel(Texture pixel) {
-        this.pixel = pixel;
+    public InfoPanel() {
     }
 
     public void update(float dt) {
@@ -29,12 +28,12 @@ public class InfoPanel {
         glyphLayout.setText(font, text);
         float pad = Constants.TEXT_BG_PAD;
         batch.setColor(0, 0, 0, Constants.TEXT_BG_ALPHA);
-        batch.draw(pixel, x - pad, y - glyphLayout.height - pad,
+        batch.draw(Assets.pixel, x - pad, y - glyphLayout.height - pad,
             glyphLayout.width + pad * 2, glyphLayout.height + pad * 2);
         batch.setColor(1, 1, 1, 1);
     }
 
-    public void drawPreview(SpriteBatch batch, BitmapFont font, Board board, Texture[] blockTextures) {
+    public void drawPreview(SpriteBatch batch, BitmapFont font, Board board) {
         int px = Constants.INFO_X;
         int py = Constants.BOARD_Y + Constants.BOARD_PX_H - Constants.INFO_PREVIEW_TOP_OFFSET;
 
@@ -47,7 +46,7 @@ public class InfoPanel {
         float swing = (float) Math.sin(swingTimer * 2.5) * 4f;
         float rot = (float) Math.sin(swingTimer * 2.5) * 3f;
         int baseX = px + Constants.INFO_PREVIEW_BLOCK_X + (int) swing;
-        Texture tex = blockTextures[board.nextType.ordinal()];
+        Texture tex = Assets.blockTextures[board.nextType.ordinal()];
         for (int r = 0; r < 4; r++) {
             for (int c = 0; c < 4; c++) {
                 if (shape[r][c] != 0) {
@@ -94,10 +93,11 @@ public class InfoPanel {
         }
     }
 
-    public void drawSplash(SpriteBatch batch, Texture splashTexture, BitmapFont bigFont) {
+    public void drawSplash(SpriteBatch batch, BitmapFont bigFont, BitmapFont font) {
         batch.begin();
-        batch.draw(splashTexture, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+        batch.draw(Assets.splashTexture, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
         bigFont.draw(batch, "push any key", Constants.SCREEN_WIDTH / 2f - Constants.SPLASH_TEXT_OFFSET_X, Constants.SPLASH_TEXT_Y);
+        font.draw(batch, "TET4K by Krusher 2026, licensed under GPL 3", 20, 40);
         batch.end();
     }
 

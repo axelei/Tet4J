@@ -2,6 +2,7 @@ package net.krusher.tet4j.gfx;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Board;
 import net.krusher.tet4j.Constants;
 
@@ -9,11 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParticleSystem {
-    private final Texture[] blockTextures;
     private final List<Particle> particles = new ArrayList<>();
 
-    public ParticleSystem(Texture[] blockTextures) {
-        this.blockTextures = blockTextures;
+    public ParticleSystem() {
     }
 
     public void spawnClearingParticles(Board board) {
@@ -32,7 +31,7 @@ public class ParticleSystem {
                 p.vy = (float)Math.sin(angle) * speed;
                 p.rotation = (float)(Math.random() * Constants.PARTICLE_ROTATION_MAX);
                 p.rotSpeed = (float)(Math.random() * Constants.PARTICLE_ROT_SPEED_MAX * 2 - Constants.PARTICLE_ROT_SPEED_MAX);
-                p.texture = blockTextures[val - 1];
+                p.texture = Assets.blockTextures[val - 1];
                 particles.add(p);
             }
         }

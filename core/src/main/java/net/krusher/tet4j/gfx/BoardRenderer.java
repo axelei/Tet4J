@@ -10,22 +10,15 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import net.krusher.tet4j.Board;
 import net.krusher.tet4j.Constants;
+import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Tetromino;
 import net.krusher.tet4j.Tetromino.Type;
 
 public class BoardRenderer {
-    private final Texture[] blockTextures;
-    private final Texture ghostTexture;
-    private final Texture bgTexture;
-    private final Texture pixel;
     private final Sprite bgSprite;
 
-    public BoardRenderer(Texture[] blockTextures, Texture ghostTexture, Texture bgTexture, Texture pixel) {
-        this.blockTextures = blockTextures;
-        this.ghostTexture = ghostTexture;
-        this.bgTexture = bgTexture;
-        this.pixel = pixel;
-        bgSprite = new Sprite(bgTexture);
+    public BoardRenderer() {
+        bgSprite = new Sprite(Assets.bgTexture);
         bgSprite.setPosition(Constants.BOARD_X, Constants.BOARD_Y);
         bgSprite.setSize(Constants.BOARD_PX_W, Constants.BOARD_PX_H);
     }
@@ -57,7 +50,7 @@ public class BoardRenderer {
         batch.enableBlending();
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         batch.setColor(1, 1, 1, Constants.BG_OPACITY);
-        batch.draw(bgTexture, Constants.BOARD_X, Constants.BOARD_Y, Constants.BOARD_PX_W, Constants.BOARD_PX_H);
+        batch.draw(Assets.bgTexture, Constants.BOARD_X, Constants.BOARD_Y, Constants.BOARD_PX_W, Constants.BOARD_PX_H);
         batch.setColor(1, 1, 1, 1);
 
         if (board.state == Board.State.CLEARING) {
@@ -69,13 +62,13 @@ public class BoardRenderer {
         }
         if (!particles.isEmpty()) particles.draw(batch);
 
-        infoPanel.drawPreview(batch, font, board, blockTextures);
+        infoPanel.drawPreview(batch, font, board);
         infoPanel.drawUI(batch, font, board);
         if (board.state == Board.State.PAUSED && !askingExit) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             batch.setColor(0, 0, 0, Constants.PAUSE_OVERLAY_ALPHA);
-            batch.draw(pixel, Constants.BOARD_X, Constants.BOARD_Y, Constants.BOARD_PX_W, Constants.BOARD_PX_H);
+            batch.draw(Assets.pixel, Constants.BOARD_X, Constants.BOARD_Y, Constants.BOARD_PX_W, Constants.BOARD_PX_H);
             batch.setColor(1, 1, 1, 1);
             bigFont.draw(batch, "PAUSED", Constants.BOARD_X + Constants.PAUSED_LABEL_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.PAUSED_LABEL_Y);
         }
@@ -87,7 +80,7 @@ public class BoardRenderer {
             for (int c = 0; c < Constants.BOARD_COLS; c++) {
                 int val = board.grid[r][c];
                 if (val > 0) {
-                    batch.draw(blockTextures[val - 1],
+                    batch.draw(Assets.blockTextures[val - 1],
                         Constants.BOARD_X + c * Constants.BLOCK_SIZE,
                         Constants.BOARD_Y + (Constants.BOARD_VISIBLE_ROWS - 1 - (r - 2)) * Constants.BLOCK_SIZE,
                         Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);
@@ -117,13 +110,13 @@ public class BoardRenderer {
         if (board.currentType == null || board.state != Board.State.PLAYING) return;
         int gy = board.getGhostY();
         if (gy == board.currentY) return;
-        drawPiece(batch, board.currentType, board.currentRotation, board.currentX, gy, ghostTexture);
+        drawPiece(batch, board.currentType, board.currentRotation, board.currentX, gy, Assets.ghostTexture);
     }
 
     private void drawCurrentPiece(SpriteBatch batch, Board board) {
         if (board.currentType == null || board.state != Board.State.PLAYING) return;
         drawPiece(batch, board.currentType, board.currentRotation, board.currentX, board.currentY,
-            blockTextures[board.currentType.ordinal()]);
+            Assets.blockTextures[board.currentType.ordinal()]);
     }
 
     private void drawClearingAnimation(SpriteBatch batch, Board board) {
@@ -143,7 +136,7 @@ public class BoardRenderer {
             for (int c = 0; c < Constants.BOARD_COLS; c++) {
                 int val = board.grid[r][c];
                 if (val == 0) continue;
-                batch.draw(blockTextures[val - 1],
+                batch.draw(Assets.blockTextures[val - 1],
                     Constants.BOARD_X + c * Constants.BLOCK_SIZE,
                     Constants.BOARD_Y + (Constants.BOARD_VISIBLE_ROWS - 1 - (r - 2) - rowShift[r] * slideProgress) * Constants.BLOCK_SIZE,
                     Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);

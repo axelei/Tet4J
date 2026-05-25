@@ -6,19 +6,11 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import net.krusher.tet4j.audio.MusicManager;
-import net.krusher.tet4j.Assets;
-import net.krusher.tet4j.Settings;
 import net.krusher.tet4j.gfx.BackgroundManager;
 import net.krusher.tet4j.gfx.BoardRenderer;
 import net.krusher.tet4j.gfx.InfoPanel;
@@ -32,14 +24,7 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
     private ShapeRenderer shapes;
     private Board board;
-    private BitmapFont font, bigFont;
     private OrthographicCamera camera;
-    private Texture pixel, splashTexture;
-    private Texture[] blockTextures;
-    private Texture ghostTexture, bgTexture;
-
-    private Sound sfxMove, sfxRotate, sfxDrop, sfxGameOver, sfxSoftDrop;
-    private Sound[] sfxClear = new Sound[4];
 
     private ParticleSystem particleSystem;
     private BackgroundManager backgroundManager;
@@ -72,38 +57,14 @@ public class Main extends ApplicationAdapter {
 
         batch = new SpriteBatch();
         shapes = new ShapeRenderer();
-        FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(Assets.file("fonts/ModernDOS8x16.ttf"));
-        FreeTypeFontParameter param = new FreeTypeFontParameter();
-        param.size = Constants.FONT_SIZE * 4;
-        font = fontGen.generateFont(param);
-        font.getData().setScale(0.25f);
-        param.size = Constants.FONT_SIZE_BIG * 4;
-        bigFont = fontGen.generateFont(param);
-        bigFont.getData().setScale(0.25f);
-        fontGen.dispose();
-
-        sfxMove = Gdx.audio.newSound(Assets.file("sounds/move.wav"));
-        sfxRotate = Gdx.audio.newSound(Assets.file("sounds/rotate.wav"));
-        sfxDrop = Gdx.audio.newSound(Assets.file("sounds/drop.wav"));
-        sfxSoftDrop = Gdx.audio.newSound(Assets.file("sounds/softdrop.wav"));
-        for (int i = 0; i < 4; i++)
-            sfxClear[i] = Gdx.audio.newSound(Assets.file("sounds/clear" + (i + 1) + ".wav"));
-        sfxGameOver = Gdx.audio.newSound(Assets.file("sounds/gameover.wav"));
-
-        loadTextures();
-        Pixmap pm = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pm.setColor(1, 1, 1, 1);
-        pm.fill();
-        pixel = new Texture(pm);
-        pm.dispose();
-        splashTexture = new Texture(Assets.file("graphics/splash.jpg"));
+        Assets.load();
 
         board = new Board();
-        particleSystem = new ParticleSystem(blockTextures);
+        particleSystem = new ParticleSystem();
         backgroundManager = new BackgroundManager();
-        musicManager = new MusicManager(pixel, settings);
-        boardRenderer = new BoardRenderer(blockTextures, ghostTexture, bgTexture, pixel);
-        infoPanel = new InfoPanel(pixel);
+        musicManager = new MusicManager(settings);
+        boardRenderer = new BoardRenderer();
+        infoPanel = new InfoPanel();
     }
 
     private void playSfx(Sound sound) {
@@ -113,17 +74,6 @@ public class Main extends ApplicationAdapter {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
-    }
-
-    private void loadTextures() {
-        String[] blockFiles = {"block_i.png", "block_o.png", "block_t.png",
-            "block_s.png", "block_z.png", "block_j.png", "block_l.png"};
-        blockTextures = new Texture[7];
-        for (int i = 0; i < 7; i++) {
-            blockTextures[i] = new Texture(Assets.file("graphics/" + blockFiles[i]));
-        }
-        ghostTexture = new Texture(Assets.file("graphics/ghost.png"));
-        bgTexture = new Texture(Assets.file("graphics/bg.png"));
     }
 
     @Override
@@ -139,7 +89,7 @@ public class Main extends ApplicationAdapter {
         musicManager.update(dt);
 
         if (showSplash) {
-            infoPanel.drawSplash(batch, splashTexture, bigFont);
+            infoPanel.drawSplash(batch, Assets.bigFont, Assets.font);
             if (!musicManager.isTitlePlaying()) {
                 musicManager.playTitle();
                 musicManager.showMusicToast(musicManager.getTitleMusicMeta());
@@ -154,7 +104,7 @@ public class Main extends ApplicationAdapter {
                     board.currentRotation = 0;
                 }
             }
-            musicManager.drawToast(batch, font);
+            musicManager.drawToast(batch, Assets.font);
             if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.isTouched()) {
                 showSplash = false;
                 musicManager.stopTitle();
@@ -168,17 +118,17 @@ public class Main extends ApplicationAdapter {
 
         if (board.justCleared) {
             int idx = Math.min(Math.max(board.linesCleared, 1), 4) - 1;
-            playSfx(sfxClear[idx]);
+            playSfx(Assets.sfxClear[idx]);
             board.justCleared = false;
             particleSystem.spawnClearingParticles(board);
         }
 
         if (board.justGameOver) {
-            playSfx(sfxGameOver);
+            playSfx(Assets.sfxGameOver);
             board.justGameOver = false;
             board.justLocked = false;
         } else if (board.justLocked) {
-            playSfx(sfxSoftDrop);
+            playSfx(Assets.sfxSoftDrop);
             board.justLocked = false;
         }
 
@@ -189,9 +139,9 @@ public class Main extends ApplicationAdapter {
 
         backgroundManager.draw(batch);
         boardRenderer.drawBoardBackground(shapes);
-        boardRenderer.drawGame(batch, bigFont, board, particleSystem, infoPanel, font, askingExit);
+        boardRenderer.drawGame(batch, Assets.bigFont, board, particleSystem, infoPanel, Assets.font, askingExit);
         if (board.state == Board.State.GAME_OVER) {
-            infoPanel.drawGameOver(batch, shapes, board, bigFont, font);
+            infoPanel.drawGameOver(batch, shapes, board, Assets.bigFont, Assets.font);
         } else if (askingExit) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -201,13 +151,13 @@ public class Main extends ApplicationAdapter {
             shapes.end();
             Gdx.gl.glDisable(GL20.GL_BLEND);
             batch.begin();
-            bigFont.draw(batch, "Quit?",
+            Assets.bigFont.draw(batch, "Quit?",
                 Constants.BOARD_X + Constants.QUIT_PROMPT_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.TEXT_CENTER_Y_OFFSET_LARGE);
-            font.draw(batch, "Y / N",
+            Assets.font.draw(batch, "Y / N",
                 Constants.BOARD_X + Constants.CONFIRM_PROMPT_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.TEXT_CENTER_Y_OFFSET_SMALL);
             batch.end();
         }
-        if (musicManager.getToastTimer() >= 0) musicManager.drawToast(batch, font);
+        if (musicManager.getToastTimer() >= 0) musicManager.drawToast(batch, Assets.font);
     }
 
     private void handleInput(float dt) {
@@ -252,19 +202,19 @@ public class Main extends ApplicationAdapter {
                 backgroundManager.reset();
                 musicManager.selectNextTrack();
                 musicManager.playCurrentGm();
-                playSfx(sfxDrop);
+                playSfx(Assets.sfxDrop);
             }
             return;
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W)) {
             board.rotateCW();
-            playSfx(sfxRotate);
+            playSfx(Assets.sfxRotate);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             board.hardDrop();
-            if (board.state == Board.State.PLAYING) playSfx(sfxDrop);
+            if (board.state == Board.State.PLAYING) playSfx(Assets.sfxDrop);
         }
 
         boolean softDropping = Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S);
@@ -287,7 +237,7 @@ public class Main extends ApplicationAdapter {
                 moveDir = dir;
                 moveTimer = 0;
                 if (dir < 0) board.moveLeft(); else board.moveRight();
-                playSfx(sfxMove);
+                playSfx(Assets.sfxMove);
             } else {
                 moveTimer += dt;
                 if (moveTimer >= Constants.DAS_DELAY) {
@@ -295,7 +245,7 @@ public class Main extends ApplicationAdapter {
                     float repeat = moveTimer - Constants.DAS_DELAY;
                     int count = (int)(repeat / Constants.DAS_REPEAT);
                     int prevCount = (int)((repeat - dt) / Constants.DAS_REPEAT);
-                    if (count > prevCount) playSfx(sfxMove);
+                    if (count > prevCount) playSfx(Assets.sfxMove);
                 }
             }
         } else {
@@ -308,20 +258,8 @@ public class Main extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         shapes.dispose();
-        font.dispose();
-        bigFont.dispose();
-        for (Texture t : blockTextures) if (t != null) t.dispose();
-        if (ghostTexture != null) ghostTexture.dispose();
-        if (bgTexture != null) bgTexture.dispose();
-        if (splashTexture != null) splashTexture.dispose();
-        if (pixel != null) pixel.dispose();
+        Assets.dispose();
         backgroundManager.dispose();
         musicManager.dispose();
-        if (sfxMove != null) sfxMove.dispose();
-        if (sfxRotate != null) sfxRotate.dispose();
-        if (sfxDrop != null) sfxDrop.dispose();
-        if (sfxSoftDrop != null) sfxSoftDrop.dispose();
-        for (Sound s : sfxClear) if (s != null) s.dispose();
-        if (sfxGameOver != null) sfxGameOver.dispose();
     }
 }
