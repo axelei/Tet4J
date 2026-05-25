@@ -38,13 +38,13 @@ public class Assets {
         bigFont.getData().setScale(0.25f);
         fontGen.dispose();
 
-        sfxMove = Gdx.audio.newSound(file("sounds/move.wav"));
-        sfxRotate = Gdx.audio.newSound(file("sounds/rotate.wav"));
-        sfxDrop = Gdx.audio.newSound(file("sounds/drop.wav"));
-        sfxSoftDrop = Gdx.audio.newSound(file("sounds/softdrop.wav"));
+        sfxMove = Gdx.audio.newSound(file("sounds/move.ogg"));
+        sfxRotate = Gdx.audio.newSound(file("sounds/rotate.ogg"));
+        sfxDrop = Gdx.audio.newSound(file("sounds/drop.ogg"));
+        sfxSoftDrop = Gdx.audio.newSound(file("sounds/softdrop.ogg"));
         for (int i = 0; i < 4; i++)
-            sfxClear[i] = Gdx.audio.newSound(file("sounds/clear" + (i + 1) + ".wav"));
-        sfxGameOver = Gdx.audio.newSound(file("sounds/gameover.wav"));
+            sfxClear[i] = Gdx.audio.newSound(file("sounds/clear" + (i + 1) + ".ogg"));
+        sfxGameOver = Gdx.audio.newSound(file("sounds/gameover.ogg"));
 
         String[] blockFiles = {"block_i.png", "block_o.png", "block_t.png",
             "block_s.png", "block_z.png", "block_j.png", "block_l.png"};

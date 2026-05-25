@@ -65,6 +65,7 @@ public class Constants {
     public static final float TOAST_SLIDE_OUT = 0.5f;
     public static final float TOAST_SLIDE_OFFSET = 30;
 
+    public static final float PAN_HARDNESS = 0.50f;
     public static final float GM_VOLUME = 0.75f;
     public static final float GM_VOLUME_PAUSED = GM_VOLUME * 0.5f;
     public static final float GM_FADE_DURATION = 2.0f;

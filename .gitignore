@@ -166,3 +166,4 @@ Thumbs.db
 # Generated
 util/build
 *.log
+*.xmp

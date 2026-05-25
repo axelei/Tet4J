@@ -23,6 +23,7 @@ public class Board {
     public boolean justCleared;
     public boolean justLocked;
     public boolean justGameOver;
+    public int lockX;
     public boolean[] clearedRows = new boolean[Constants.BOARD_ROWS];
     public int linesCleared;
     public float clearTimer;
@@ -82,6 +83,7 @@ public class Board {
 
     public void lockPiece() {
         justLocked = true;
+        lockX = currentX;
         int[][] shape = Tetromino.getShape(currentType, currentRotation);
         for (int r = 0; r < 4; r++) {
             for (int c = 0; c < 4; c++) {
@@ -182,35 +184,38 @@ public class Board {
         spawnPiece();
     }
 
-    public void moveLeft() {
-        if (state != State.PLAYING) return;
-        if (canPlace(currentType, currentRotation, currentX - 1, currentY)) currentX--;
+    public boolean moveLeft() {
+        if (state != State.PLAYING) return false;
+        if (canPlace(currentType, currentRotation, currentX - 1, currentY)) { currentX--; return true; }
+        return false;
     }
 
-    public void moveRight() {
-        if (state != State.PLAYING) return;
-        if (canPlace(currentType, currentRotation, currentX + 1, currentY)) currentX++;
+    public boolean moveRight() {
+        if (state != State.PLAYING) return false;
+        if (canPlace(currentType, currentRotation, currentX + 1, currentY)) { currentX++; return true; }
+        return false;
     }
 
-    public void rotateCW() {
-        if (state != State.PLAYING) return;
+    public boolean rotateCW() {
+        if (state != State.PLAYING) return false;
         int newRot = (currentRotation + 1) & Constants.ROTATION_MASK;
         if (canPlace(currentType, newRot, currentX, currentY)) {
             currentRotation = newRot;
-            return;
+            return true;
         }
         if (canPlace(currentType, newRot, currentX - 1, currentY)) {
             currentRotation = newRot; currentX--;
-            return;
+            return true;
         }
         if (canPlace(currentType, newRot, currentX + 1, currentY)) {
             currentRotation = newRot; currentX++;
-            return;
+            return true;
         }
         if (canPlace(currentType, newRot, currentX, currentY - 1)) {
             currentRotation = newRot; currentY--;
-            return;
+            return true;
         }
+        return false;
     }
 
     public void softDrop() {
@@ -253,6 +258,7 @@ public class Board {
         lines = Constants.STARTING_LEVEL * Constants.LINES_PER_LEVEL;
         level = Constants.STARTING_LEVEL;
         gameOver = false;
+        lockX = Constants.SPAWN_X;
         state = State.PLAYING;
         dropInterval = dropIntervalForLevel(level);
         dropTimer = 0;

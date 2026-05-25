@@ -39,6 +39,7 @@ public class Main extends ApplicationAdapter {
     private float moveTimer, dropTimer;
     private int moveDir;
     private boolean askingExit;
+    private long gameOverSoundId = -1;
 
     @Override
     public void create() {
@@ -69,6 +70,19 @@ public class Main extends ApplicationAdapter {
 
     private void playSfx(Sound sound) {
         if (sound != null && settings.isSoundEffectsEnabled()) sound.play();
+    }
+
+    private void playSfx(Sound sound, float pan) {
+        if (sound != null && settings.isSoundEffectsEnabled()) sound.play(1f, 1f, pan);
+    }
+
+    private float piecePan() {
+        return piecePan(board.currentX);
+    }
+
+    private float piecePan(float x) {
+        float maxCol = Constants.BOARD_COLS - 1f;
+        return ((x / maxCol) * 2f - 1f) * Constants.PAN_HARDNESS;
     }
 
     @Override
@@ -124,11 +138,13 @@ public class Main extends ApplicationAdapter {
         }
 
         if (board.justGameOver) {
-            playSfx(Assets.sfxGameOver);
+            if (Assets.sfxGameOver != null && settings.isSoundEffectsEnabled()) {
+                gameOverSoundId = Assets.sfxGameOver.play();
+            }
             board.justGameOver = false;
             board.justLocked = false;
         } else if (board.justLocked) {
-            playSfx(Assets.sfxSoftDrop);
+            playSfx(Assets.sfxSoftDrop, piecePan(board.lockX));
             board.justLocked = false;
         }
 
@@ -197,6 +213,10 @@ public class Main extends ApplicationAdapter {
         if (board.state != Board.State.PLAYING) {
             if (board.state == Board.State.GAME_OVER &&
                 (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER))) {
+                if (gameOverSoundId != -1 && Assets.sfxGameOver != null) {
+                    Assets.sfxGameOver.stop(gameOverSoundId);
+                    gameOverSoundId = -1;
+                }
                 board.reset();
                 particleSystem.clear();
                 backgroundManager.reset(Constants.STARTING_LEVEL);
@@ -208,13 +228,12 @@ public class Main extends ApplicationAdapter {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W)) {
-            board.rotateCW();
-            playSfx(Assets.sfxRotate);
+            if (board.rotateCW()) playSfx(Assets.sfxRotate, piecePan());
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             board.hardDrop();
-            if (board.state == Board.State.PLAYING) playSfx(Assets.sfxDrop);
+            if (board.state == Board.State.PLAYING) playSfx(Assets.sfxDrop, piecePan(board.lockX));
         }
 
         boolean softDropping = Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S);
@@ -236,16 +255,16 @@ public class Main extends ApplicationAdapter {
             if (moveDir != dir) {
                 moveDir = dir;
                 moveTimer = 0;
-                if (dir < 0) board.moveLeft(); else board.moveRight();
-                playSfx(Assets.sfxMove);
+                boolean moved = dir < 0 ? board.moveLeft() : board.moveRight();
+                if (moved) playSfx(Assets.sfxMove, piecePan());
             } else {
                 moveTimer += dt;
                 if (moveTimer >= Constants.DAS_DELAY) {
-                    if (dir < 0) board.moveLeft(); else board.moveRight();
+                    boolean moved = dir < 0 ? board.moveLeft() : board.moveRight();
                     float repeat = moveTimer - Constants.DAS_DELAY;
                     int count = (int)(repeat / Constants.DAS_REPEAT);
                     int prevCount = (int)((repeat - dt) / Constants.DAS_REPEAT);
-                    if (count > prevCount) playSfx(Assets.sfxMove);
+                    if (moved && count > prevCount) playSfx(Assets.sfxMove, piecePan());
                 }
             }
         } else {
