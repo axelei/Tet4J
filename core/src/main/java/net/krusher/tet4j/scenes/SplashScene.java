@@ -24,6 +24,7 @@ public class SplashScene {
     }
 
     public void render() {
+        infoPanel.update(Gdx.graphics.getDeltaTime());
         infoPanel.drawSplash(batch, Assets.bigFont, Assets.font);
         if (!musicManager.isTitlePlaying()) {
             musicManager.playTitle();

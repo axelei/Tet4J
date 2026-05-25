@@ -85,8 +85,8 @@ public class Constants {
     public static final int INFO_UI_TOP_OFFSET = 180;
     public static final int INFO_PREVIEW_GAP = 18;
     public static final int INFO_PREVIEW_BLOCK_X = 135;
-    public static final int INFO_LABEL_VALUE_GAP = 39;
-    public static final int INFO_VALUE_LABEL_GAP = 57;
+    public static final int INFO_LABEL_VALUE_GAP = 48;
+    public static final int INFO_VALUE_LABEL_GAP = 66;
     public static final int INFO_KEY_LABEL_FIRST = 180;
     public static final int INFO_KEY_LABEL_STEP = 45;
 

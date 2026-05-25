@@ -51,7 +51,9 @@ public class PlayScene {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             board.hardDrop();
-            if (board.state == Board.State.PLAYING) playSfx(Assets.sfxDrop, piecePan(board.lockX));
+            if (board.state != Board.State.GAME_OVER) {
+                playSfx(Assets.sfxDrop, piecePan(board.lockX));
+            }
         }
 
         boolean softDropping = Gdx.input.isKeyPressed(Input.Keys.DOWN) || Gdx.input.isKeyPressed(Input.Keys.S);
@@ -93,7 +95,7 @@ public class PlayScene {
 
     public void processEvents(float dt) {
         if (board.justCleared) {
-            int idx = Math.min(Math.max(board.linesCleared, 1), 4) - 1;
+            int idx = Math.clamp(board.linesCleared, 1, 4) - 1;
             playSfx(Assets.sfxClear[idx]);
             board.justCleared = false;
             particleSystem.spawnClearingParticles(board);

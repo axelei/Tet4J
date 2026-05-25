@@ -38,10 +38,10 @@ public class GameOverScene {
     }
 
     public void render() {
-        infoPanel.drawGameOver(batch, shapes, board, Assets.bigFont, Assets.font);
+        infoPanel.drawGameOver(batch, shapes, Assets.bigFont, Assets.font);
     }
 
-    public boolean handleInput() {
+    public void handleInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             if (gameOverSoundId != -1 && Assets.sfxGameOver != null) {
                 Assets.sfxGameOver.stop(gameOverSoundId);
@@ -52,9 +52,7 @@ public class GameOverScene {
             backgroundManager.reset(Constants.STARTING_LEVEL);
             musicManager.selectNextTrack();
             musicManager.playCurrentGm();
-            return true;
         }
-        return false;
     }
 
     public void playGameOverSound() {

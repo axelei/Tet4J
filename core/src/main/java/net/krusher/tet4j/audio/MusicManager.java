@@ -121,7 +121,7 @@ public class MusicManager {
 
         Music previousTrack = currentGm;
         if (gameplayMusic.size() == 1) {
-            currentGm = gameplayMusic.get(0);
+            currentGm = gameplayMusic.getFirst();
         } else {
             do {
                 currentGm = gameplayMusic.get((int)(Math.random() * gameplayMusic.size()));

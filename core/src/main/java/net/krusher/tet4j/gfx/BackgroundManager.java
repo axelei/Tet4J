@@ -17,8 +17,11 @@ public class BackgroundManager {
     private final Color tintColor = new Color(1, 1, 1, 1);
     private float currentLuminosity;
 
+    private final java.util.List<com.badlogic.gdx.files.FileHandle> masterQueue = new java.util.ArrayList<>();
+
     public BackgroundManager() {
         prevLevel = Constants.STARTING_LEVEL;
+        // Just in case we are changing the starting level.
         currentBgTex = Constants.STARTING_LEVEL < Constants.NUM_LEVEL_BG
             ? loadLevelTexture(Constants.STARTING_LEVEL)
             : loadMasterTexture();
@@ -28,15 +31,19 @@ public class BackgroundManager {
         return loadTexture(Assets.file("backgrounds/level" + (level + 1) + ".jpg"));
     }
 
-    private Texture loadMasterTexture() {
-        java.util.ArrayList<com.badlogic.gdx.files.FileHandle> masters = new java.util.ArrayList<>();
+    private void refillMasterQueue() {
+        masterQueue.clear();
         for (com.badlogic.gdx.files.FileHandle f : Assets.file("backgrounds/master").list()) {
             String n = f.name().toLowerCase();
-            if (n.endsWith(".jpg") || n.endsWith(".png")) masters.add(f);
+            if (n.endsWith(".jpg") || n.endsWith(".png")) masterQueue.add(f);
         }
-        if (masters.isEmpty()) return loadLevelTexture(0);
-        com.badlogic.gdx.files.FileHandle chosen = masters.get((int) (Math.random() * masters.size()));
-        return loadTexture(chosen);
+        java.util.Collections.shuffle(masterQueue, new java.util.Random());
+    }
+
+    private Texture loadMasterTexture() {
+        if (masterQueue.isEmpty()) refillMasterQueue();
+        if (masterQueue.isEmpty()) return loadLevelTexture(0);
+        return loadTexture(masterQueue.removeFirst());
     }
 
     private Texture loadTexture(com.badlogic.gdx.files.FileHandle file) {

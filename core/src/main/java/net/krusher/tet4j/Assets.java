@@ -7,11 +7,13 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
 public class Assets {
 
     public static Texture pixel;
     public static Texture splashTexture;
+    public static Texture logoTexture;
     public static Texture[] blockTextures;
     public static Texture ghostTexture;
     public static Texture bgTexture;
@@ -19,6 +21,7 @@ public class Assets {
 
     public static BitmapFont font;
     public static BitmapFont bigFont;
+    public static ShaderProgram glowShader;
 
     public static Sound sfxMove;
     public static Sound sfxRotate;
@@ -63,6 +66,13 @@ public class Assets {
         pm.dispose();
 
         splashTexture = new Texture(file("graphics/splash.jpg"));
+        logoTexture = new Texture(file("graphics/tet4j_logo.png"));
+
+        ShaderProgram.pedantic = false;
+        glowShader = new ShaderProgram(file("shaders/glow.vert"), file("shaders/glow.frag"));
+        if (!glowShader.isCompiled()) {
+            Gdx.app.error("Assets", "glow shader compile failed: " + glowShader.getLog());
+        }
     }
 
     public static void dispose() {
@@ -73,6 +83,7 @@ public class Assets {
         if (bgTexture != null) bgTexture.dispose();
         if (relief != null) relief.dispose();
         if (splashTexture != null) splashTexture.dispose();
+        if (logoTexture != null) logoTexture.dispose();
         if (pixel != null) pixel.dispose();
         if (sfxMove != null) sfxMove.dispose();
         if (sfxRotate != null) sfxRotate.dispose();
@@ -80,6 +91,7 @@ public class Assets {
         if (sfxSoftDrop != null) sfxSoftDrop.dispose();
         if (sfxClear != null) for (Sound s : sfxClear) if (s != null) s.dispose();
         if (sfxGameOver != null) sfxGameOver.dispose();
+        if (glowShader != null) glowShader.dispose();
     }
 
     public static com.badlogic.gdx.files.FileHandle file(String path) {

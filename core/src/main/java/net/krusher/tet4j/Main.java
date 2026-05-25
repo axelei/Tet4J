@@ -2,6 +2,7 @@ package net.krusher.tet4j;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -82,6 +83,16 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
+        if ((Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT))
+            && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            boolean full = !Gdx.graphics.isFullscreen();
+            if (full) {
+                Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+            } else {
+                Gdx.graphics.setWindowedMode(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
+            }
+            settings.setFullscreenEnabled(full);
+        }
         Gdx.gl.glClearColor(Constants.BOARD_BG.r, Constants.BOARD_BG.g, Constants.BOARD_BG.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         viewport.apply();
@@ -132,6 +143,7 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void dispose() {
+        settings.save();
         batch.dispose();
         shapes.dispose();
         Assets.dispose();

@@ -12,6 +12,28 @@ dependencies {
   }
 }
 
+def generatedDir = layout.buildDirectory.dir("generated/version")
+
+tasks.register('generateVersionSource') {
+    def pkgDir = generatedDir.map { it.dir("net/krusher/tet4j") }
+    def outputFile = pkgDir.map { it.file("BuildInfo.java") }
+    outputs.file(outputFile)
+    doLast {
+        pkgDir.get().asFile.mkdirs()
+        outputFile.get().asFile.text = """package net.krusher.tet4j;
+
+public class BuildInfo {
+    public static final String VERSION = "${projectVersion}";
+}
+"""
+    }
+}
+
+sourceSets.main.java.srcDir(generatedDir)
+tasks.named('compileJava').configure {
+    dependsOn tasks.named('generateVersionSource')
+}
+
 jar {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

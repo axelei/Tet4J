@@ -71,7 +71,7 @@ public class BoardRenderer {
         if (!particles.isEmpty()) particles.draw(batch);
 
         infoPanel.drawPreview(batch, font, board);
-        infoPanel.drawUI(batch, font, board);
+        infoPanel.drawUI(batch, font, bigFont, board);
         if (board.state == Board.State.PAUSED && !askingExit) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -90,7 +90,7 @@ public class BoardRenderer {
                 if (block != null) {
                     float x = Constants.BOARD_X + c * Constants.BLOCK_SIZE;
                     float y = Constants.BOARD_Y + (Constants.BOARD_VISIBLE_ROWS - 1 - (r - 2)) * Constants.BLOCK_SIZE;
-                    drawBlock(batch, block.texture, x, y, block.rotation * 90f, true);
+                    drawBlock(batch, block.texture(), x, y, block.rotation() * 90f, true);
                 }
             }
         }
@@ -147,7 +147,7 @@ public class BoardRenderer {
                 t = t * t * (3 - 2 * t);
                 float x = Constants.BOARD_X + c * Constants.BLOCK_SIZE;
                 float y = Constants.BOARD_Y + (Constants.BOARD_VISIBLE_ROWS - 1 - (r - 2) - rowShift[r] * t) * Constants.BLOCK_SIZE;
-                drawBlock(batch, block.texture, x, y, block.rotation * 90f, true);
+                drawBlock(batch, block.texture(), x, y, block.rotation() * 90f, true);
             }
         }
     }
