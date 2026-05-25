@@ -23,7 +23,7 @@ jobs:
             gradle: .\gradlew.bat
             package: :lwjgl3:packageWinX64
             artifact-id: win-x64
-          - os: macos-13
+          - os: macos-latest
             gradle: ./gradlew
             package: :lwjgl3:packageMacX64
             artifact-id: mac-x64

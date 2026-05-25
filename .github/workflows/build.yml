@@ -14,8 +14,6 @@ jobs:
             gradle: ./gradlew
           - os: windows-latest
             gradle: .\gradlew.bat
-          - os: macos-13
-            gradle: ./gradlew
           - os: macos-latest
             gradle: ./gradlew
 

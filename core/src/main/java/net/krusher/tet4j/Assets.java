@@ -95,6 +95,7 @@ public class Assets {
     }
 
     public static com.badlogic.gdx.files.FileHandle file(String path) {
+        // First, try to find assets in the current working directory
         java.io.File assetsDir = new java.io.File("assets");
         if (assetsDir.exists() && assetsDir.isDirectory()) {
             if (path.startsWith("assets/") || path.startsWith("assets\\")) {
@@ -102,8 +103,31 @@ public class Assets {
             } else {
                 return Gdx.files.local("assets/" + path);
             }
-        } else {
+        }
+        
+        // If not found, try relative to the JAR/executable location (for bundled macOS apps)
+        try {
+            // Get the location of the current JAR or executable
+            String classPath = Assets.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            java.io.File jarDir = new java.io.File(classPath).getParentFile();
+            
+            assetsDir = new java.io.File(jarDir, "assets");
+            if (assetsDir.exists() && assetsDir.isDirectory()) {
+                if (path.startsWith("assets/") || path.startsWith("assets\\")) {
+                    return Gdx.files.absolute(new java.io.File(assetsDir.getParent(), path).getAbsolutePath());
+                } else {
+                    return Gdx.files.absolute(new java.io.File(assetsDir, path).getAbsolutePath());
+                }
+            }
+        } catch (Exception ignored) {
+            // If something goes wrong, fall through to the default behavior
+        }
+        
+        // Fallback to default behavior
+        if (path.startsWith("assets/") || path.startsWith("assets\\")) {
             return Gdx.files.local(path);
+        } else {
+            return Gdx.files.local("assets/" + path);
         }
     }
 }

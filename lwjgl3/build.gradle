@@ -126,7 +126,7 @@ tasks.register("jarWin") {
   }
 }
 
-def rootFilesToInclude = ['attributions.md', 'README.md']
+def rootFilesToInclude = ['attributions.md', 'README.md', 'LICENSE.txt']
 
 dependencies {
     implementation 'org.commonmark:commonmark:0.22.0'
@@ -232,8 +232,18 @@ tasks.named('packageLinuxX64') {
 
 tasks.register('copyAssetsMacM1', Copy) {
     from rootProject.file('assets')
-    into layout.buildDirectory.dir("construo/macM1/roast/runtime/bin/assets")
-    dependsOn 'createRuntimeImageMacM1'
+    into layout.buildDirectory.dir("construo/macM1/roast/assets")
+    dependsOn 'roastMacM1'
+}
+tasks.named('buildMacAppBundleMacM1') {
+    dependsOn 'copyAssetsMacM1'
+    mustRunAfter 'clean'
+    doLast {
+        copy {
+            from layout.buildDirectory.dir("construo/macM1/roast/assets")
+            into layout.buildDirectory.dir("construo/macM1/Tet4J.app/Contents/MacOS/assets")
+        }
+    }
 }
 tasks.named('packageMacM1') {
     dependsOn 'copyAssetsMacM1'
@@ -241,8 +251,18 @@ tasks.named('packageMacM1') {
 
 tasks.register('copyAssetsMacX64', Copy) {
     from rootProject.file('assets')
-    into layout.buildDirectory.dir("construo/macX64/roast/runtime/bin/assets")
-    dependsOn 'createRuntimeImageMacX64'
+    into layout.buildDirectory.dir("construo/macX64/roast/assets")
+    dependsOn 'roastMacX64'
+}
+tasks.named('buildMacAppBundleMacX64') {
+    dependsOn 'copyAssetsMacX64'
+    mustRunAfter 'clean'
+    doLast {
+        copy {
+            from layout.buildDirectory.dir("construo/macX64/roast/assets")
+            into layout.buildDirectory.dir("construo/macX64/Tet4J.app/Contents/MacOS/assets")
+        }
+    }
 }
 tasks.named('packageMacX64') {
     dependsOn 'copyAssetsMacX64'
@@ -402,24 +422,6 @@ tasks.named('packageMacM1') {
             from rootProject.file('assets')
             into layout.buildDirectory.dir("construo/macM1/roast/assets")
         }
-        // Copy additional files to the root of the ZIP
-        rootFilesToInclude.each { fileName ->
-            if (fileName.endsWith('.md')) {
-                File htmlFile = new File(rootProject.projectDir, fileName.replace('.md', '.html'))
-                if (htmlFile.exists()) {
-                    copy {
-                        from htmlFile
-                        into layout.buildDirectory.dir("construo/macM1/roast")
-                        rename { fileName.replace('.md', '.html') }
-                    }
-                }
-            } else {
-                copy {
-                    from rootProject.file(fileName)
-                    into layout.buildDirectory.dir("construo/macM1/roast")
-                }
-            }
-        }
         delete layout.buildDirectory.dir("construo/macM1/roast/package/assets")
     }
     doLast {
@@ -433,26 +435,6 @@ tasks.named('packageMacM1') {
         }
     }
 }
-try {
-    tasks.named('packageMacM1', Zip) { Zip z ->
-        from(layout.buildDirectory.dir("construo/macM1/roast")) {
-            eachFile { fcd ->
-                def segs = fcd.relativePath.segments
-                if (segs.length > 0 && segs[0] == 'package') {
-                    def newSegs = segs.length > 1 ? segs[1..-1] : []
-                    if (newSegs.size() > 0) {
-                        fcd.relativePath = new org.gradle.api.file.RelativePath(true, newSegs as String[])
-                    } else {
-                        fcd.exclude()
-                    }
-                }
-            }
-            includeEmptyDirs = false
-        }
-        from(rootProject.file('assets')) { into 'assets' }
-    }
-} catch(Exception ignored) {}
-
 
 tasks.named('packageMacX64') {
     dependsOn 'clean','copyAssetsMacX64', 'convertMarkdownToHtml'
@@ -460,24 +442,6 @@ tasks.named('packageMacX64') {
         copy {
             from rootProject.file('assets')
             into layout.buildDirectory.dir("construo/macX64/roast/assets")
-        }
-        // Copy additional files to the root of the ZIP
-        rootFilesToInclude.each { fileName ->
-            if (fileName.endsWith('.md')) {
-                File htmlFile = new File(rootProject.projectDir, fileName.replace('.md', '.html'))
-                if (htmlFile.exists()) {
-                    copy {
-                        from htmlFile
-                        into layout.buildDirectory.dir("construo/macX64/roast")
-                        rename { fileName.replace('.md', '.html') }
-                    }
-                }
-            } else {
-                copy {
-                    from rootProject.file(fileName)
-                    into layout.buildDirectory.dir("construo/macX64/roast")
-                }
-            }
         }
         delete layout.buildDirectory.dir("construo/macX64/roast/package/assets")
     }
@@ -492,27 +456,7 @@ tasks.named('packageMacX64') {
         }
     }
 }
-try {
-    tasks.named('packageMacX64', Zip) { Zip z ->
-        from(layout.buildDirectory.dir("construo/macX64/roast")) {
-            eachFile { fcd ->
-                def segs = fcd.relativePath.segments
-                if (segs.length > 0 && segs[0] == 'package') {
-                    def newSegs = segs.length > 1 ? segs[1..-1] : []
-                    if (newSegs.size() > 0) {
-                        fcd.relativePath = new org.gradle.api.file.RelativePath(true, newSegs as String[])
-                    } else {
-                        fcd.exclude()
-                    }
-                }
-            }
-            includeEmptyDirs = false
-        }
-        from(rootProject.file('assets')) { into 'assets' }
-    }
-} catch(Exception ignored) {}
 
-// Aggregate task covering runtime copy tasks
 tasks.register('copyAssetsAllConstruo') {
     dependsOn 'copyAssetsWinX64','copyAssetsLinuxX64','copyAssetsMacM1','copyAssetsMacX64'
 }
