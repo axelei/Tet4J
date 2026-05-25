@@ -54,7 +54,7 @@ public class Constants {
     public static final float PARTICLE_ROT_SPEED_MAX = 360;
     public static final float PARTICLE_MAX_AGE_MULTIPLIER = 2;
 
-    public static final float TOAST_DURATION = 4f;
+    public static final float TOAST_DURATION = 6f;
     public static final float TOAST_MAX_WIDTH = 480;
     public static final float TOAST_PAD_X = 9;
     public static final float TOAST_PAD_Y = 9;

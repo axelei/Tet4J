@@ -9,9 +9,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import net.krusher.tet4j.Assets;
-import net.krusher.tet4j.Board;
+import net.krusher.tet4j.entities.Board;
 import net.krusher.tet4j.Constants;
-import net.krusher.tet4j.Tetromino;
+import net.krusher.tet4j.entities.Tetromino;
 
 public class InfoPanel {
     private final GlyphLayout glyphLayout = new GlyphLayout();

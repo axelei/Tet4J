@@ -9,11 +9,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import net.krusher.tet4j.Assets;
-import net.krusher.tet4j.Block;
-import net.krusher.tet4j.Board;
+import net.krusher.tet4j.entities.Block;
+import net.krusher.tet4j.entities.Board;
 import net.krusher.tet4j.Constants;
-import net.krusher.tet4j.Tetromino;
-import net.krusher.tet4j.Tetromino.Type;
+import net.krusher.tet4j.entities.Tetromino;
+import net.krusher.tet4j.entities.Tetromino.Type;
 
 public class BoardRenderer {
     private final Sprite bgSprite;

@@ -6,7 +6,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import net.krusher.tet4j.Assets;
-import net.krusher.tet4j.Board;
+import net.krusher.tet4j.entities.Board;
 import net.krusher.tet4j.Constants;
 import net.krusher.tet4j.Settings;
 import net.krusher.tet4j.gfx.Toast;

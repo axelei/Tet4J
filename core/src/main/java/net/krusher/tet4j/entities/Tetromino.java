@@ -1,6 +1,4 @@
-package net.krusher.tet4j;
-
-import com.badlogic.gdx.graphics.Color;
+package net.krusher.tet4j.entities;
 
 public class Tetromino {
     public enum Type {

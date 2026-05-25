@@ -1,11 +1,13 @@
-package net.krusher.tet4j;
+package net.krusher.tet4j.entities;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Arrays;
 
-import net.krusher.tet4j.Tetromino.Type;
+import net.krusher.tet4j.Assets;
+import net.krusher.tet4j.Constants;
+import net.krusher.tet4j.entities.Tetromino.Type;
 
 public class Board {
     public enum State { PLAYING, CLEARING, GAME_OVER, PAUSED }

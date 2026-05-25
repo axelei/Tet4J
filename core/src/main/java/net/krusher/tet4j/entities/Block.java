@@ -1,4 +1,4 @@
-package net.krusher.tet4j;
+package net.krusher.tet4j.entities;
 
 import com.badlogic.gdx.graphics.Texture;
 

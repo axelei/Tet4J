@@ -1,8 +1,7 @@
 package net.krusher.tet4j.gfx;
 
 import com.badlogic.gdx.graphics.Texture;
-import net.krusher.tet4j.Block;
-import net.krusher.tet4j.Board;
+import net.krusher.tet4j.entities.Block;
 import net.krusher.tet4j.Constants;
 
 public class Particle {
