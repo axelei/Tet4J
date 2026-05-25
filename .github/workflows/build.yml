@@ -1,0 +1,43 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            gradle: ./gradlew
+          - os: windows-latest
+            gradle: .\gradlew.bat
+          - os: macos-13
+            gradle: ./gradlew
+          - os: macos-latest
+            gradle: ./gradlew
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - run: chmod +x gradlew
+        if: runner.os != 'Windows'
+
+      - run: ${{ matrix.gradle }} build
