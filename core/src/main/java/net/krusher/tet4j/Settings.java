@@ -1,114 +1,56 @@
 package net.krusher.tet4j;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Properties;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 
 /**
- * Simple data class that holds game settings loaded from a properties file.
- * Settings are loaded once at initialization and provide read-only access.
+ * Settings class that manages game preferences using Gdx.app.getPreferences.
+ * Settings are automatically persisted to the platform-specific preferences storage.
  */
 public class Settings {
-    private final boolean musicEnabled;
-    private final boolean soundEffectsEnabled;
+    private static final String PREFS_NAME = "tet4j_settings";
+    private final Preferences prefs;
     private boolean fullscreenEnabled;
-    private final Properties props;
 
     /**
-     * Creates a new Settings instance by loading from the settings file.
-     * Creates default settings if file doesn't exist.
+     * Creates a new Settings instance by loading from Gdx preferences.
+     * Creates default settings if preferences don't exist.
      */
     public Settings() {
-        this.props = loadSettingsFile();
-
+        this.prefs = Gdx.app.getPreferences(PREFS_NAME);
+        
         // Load all settings with defaults from enum
-        this.musicEnabled = getBoolean(props, "music", DefaultSettings.MUSIC.getDefaultValue());
-        this.soundEffectsEnabled = getBoolean(props, "sound_effects", DefaultSettings.SOUND_EFFECTS.getDefaultValue());
-        this.fullscreenEnabled = getBoolean(props, "fullscreen", DefaultSettings.FULLSCREEN.getDefaultValue());
-    }
-
-    /**
-     * Loads settings from file, creating defaults if file doesn't exist.
-     */
-    private Properties loadSettingsFile() {
-        File settingsFile = getSettingsFile();
-        Properties props = new Properties();
-
-        try {
-            if (settingsFile.exists()) {
-                FileInputStream in = new FileInputStream(settingsFile);
-                props.load(in);
-                in.close();
-            } else {
-                // Create default settings file
-                createDefaultSettingsFile(settingsFile);
-                // Load the newly created file
-                FileInputStream in = new FileInputStream(settingsFile);
-                props.load(in);
-                in.close();
-            }
-        } catch (Exception e) {
-            // If anything goes wrong, create default settings
-            createDefaultSettingsFile(settingsFile);
+        if (!prefs.contains("music")) {
+            initializeDefaults();
         }
-
-        return props;
+        
+        this.fullscreenEnabled = getBoolean("fullscreen", DefaultSettings.FULLSCREEN.getDefaultValue());
     }
 
     /**
-     * Gets the settings file location.
-     * If working directory is "assets", uses parent directory.
-     * Otherwise, uses working directory.
+     * Initializes preferences with default values from DefaultSettings enum.
      */
-    private File getSettingsFile() {
-        File workingDir = new File(System.getProperty("user.dir"));
-
-        // If working directory is "assets", use parent directory
-        if (workingDir.getName().equals("assets")) {
-            return new File(workingDir.getParentFile(), "settings.properties");
+    private void initializeDefaults() {
+        for (DefaultSettings setting : DefaultSettings.values()) {
+            prefs.putString(setting.name().toLowerCase(), setting.getDefaultValue());
         }
-
-        // Otherwise use working directory
-        return new File(workingDir, "settings.properties");
+        prefs.flush();
     }
 
     /**
-     * Creates a settings file with default values.
+     * Helper method to get boolean value from preferences.
      */
-    private void createDefaultSettingsFile(File settingsFile) {
-        try {
-            Properties defaultProps = new Properties();
-
-            // Set all default values from DefaultSettings enum
-            for (DefaultSettings setting : DefaultSettings.values()) {
-                defaultProps.setProperty(setting.name().toLowerCase(), setting.getDefaultValue());
-            }
-
-            // Write to file
-            FileOutputStream out = new FileOutputStream(settingsFile);
-            defaultProps.store(out, "Game Settings - Default values");
-            out.close();
-        } catch (IOException e) {
-            System.err.println("Could not create settings.properties file: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Helper method to get boolean value from properties.
-     */
-    private boolean getBoolean(Properties props, String key, String defaultValue) {
-        String value = props.getProperty(key, defaultValue);
+    private boolean getBoolean(String key, String defaultValue) {
+        String value = prefs.getString(key, defaultValue);
         return value.equalsIgnoreCase("on");
     }
 
     public boolean isMusicEnabled() {
-        return musicEnabled;
+        return getBoolean("music", DefaultSettings.MUSIC.getDefaultValue());
     }
 
     public boolean isSoundEffectsEnabled() {
-        return soundEffectsEnabled;
+        return getBoolean("sound_effects", DefaultSettings.SOUND_EFFECTS.getDefaultValue());
     }
 
     public boolean isFullscreenEnabled() {
@@ -117,16 +59,14 @@ public class Settings {
 
     public void setFullscreenEnabled(boolean enabled) {
         this.fullscreenEnabled = enabled;
+        save();
     }
 
+    /**
+     * Saves current settings to preferences.
+     */
     public void save() {
-        try {
-            props.setProperty("fullscreen", fullscreenEnabled ? "on" : "off");
-            FileOutputStream out = new FileOutputStream(getSettingsFile());
-            props.store(out, "Game Settings");
-            out.close();
-        } catch (IOException e) {
-            System.err.println("Could not save settings.properties: " + e.getMessage());
-        }
+        prefs.putString("fullscreen", fullscreenEnabled ? "on" : "off");
+        prefs.flush();
     }
 }

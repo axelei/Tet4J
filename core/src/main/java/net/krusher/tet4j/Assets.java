@@ -95,39 +95,66 @@ public class Assets {
     }
 
     public static com.badlogic.gdx.files.FileHandle file(String path) {
-        // First, try to find assets in the current working directory
+        // Normalize path to forward slashes for consistency
+        String normalizedPath = path.replace("\\", "/");
+        if (!normalizedPath.startsWith("assets/")) {
+            normalizedPath = "assets/" + normalizedPath;
+        }
+
+        // Try 1: Current working directory (Gradle run task)
         java.io.File assetsDir = new java.io.File("assets");
         if (assetsDir.exists() && assetsDir.isDirectory()) {
-            if (path.startsWith("assets/") || path.startsWith("assets\\")) {
-                return Gdx.files.local(path);
-            } else {
-                return Gdx.files.local("assets/" + path);
-            }
+            return Gdx.files.local(normalizedPath);
         }
-        
-        // If not found, try relative to the JAR/executable location (for bundled macOS apps)
+
+        // Try 2: Relative to user working directory
+        java.io.File userDir = new java.io.File(System.getProperty("user.dir"));
+        assetsDir = new java.io.File(userDir, "assets");
+        if (assetsDir.exists() && assetsDir.isDirectory()) {
+            return Gdx.files.local(normalizedPath);
+        }
+
+        // Try 3: Relative to executable/JAR location (for packaged builds)
         try {
-            // Get the location of the current JAR or executable
-            String classPath = Assets.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-            java.io.File jarDir = new java.io.File(classPath).getParentFile();
-            
-            assetsDir = new java.io.File(jarDir, "assets");
-            if (assetsDir.exists() && assetsDir.isDirectory()) {
-                if (path.startsWith("assets/") || path.startsWith("assets\\")) {
-                    return Gdx.files.absolute(new java.io.File(assetsDir.getParent(), path).getAbsolutePath());
-                } else {
-                    return Gdx.files.absolute(new java.io.File(assetsDir, path).getAbsolutePath());
+            java.net.URL codeLocation = Assets.class.getProtectionDomain().getCodeSource().getLocation();
+            if (codeLocation != null) {
+                java.nio.file.Path codePath = new java.io.File(java.net.URLDecoder.decode(codeLocation.getPath(), "UTF-8")).toPath();
+
+                // Handle macOS app bundle structure (.app/Contents/MacOS/...)
+                if (codePath.toString().contains(".app/Contents/MacOS")) {
+                    // For macOS bundles: go up from .../Tet4J.app/Contents/MacOS/bin to .../Tet4J.app/Contents/MacOS
+                    java.io.File macOSDir = codePath.getParent().toFile();
+                    assetsDir = new java.io.File(macOSDir, "assets");
+                    if (assetsDir.exists() && assetsDir.isDirectory()) {
+                        return Gdx.files.absolute(new java.io.File(assetsDir, normalizedPath.substring("assets/".length())).getAbsolutePath());
+                    }
+                }
+
+                // Handle standard executable/JAR location
+                java.io.File exeDir = codePath.getParent().toFile();
+                assetsDir = new java.io.File(exeDir, "assets");
+                if (assetsDir.exists() && assetsDir.isDirectory()) {
+                    return Gdx.files.absolute(new java.io.File(assetsDir, normalizedPath.substring("assets/".length())).getAbsolutePath());
+                }
+
+                // For JAR files, try the directory containing the JAR
+                if (codePath.toString().endsWith(".jar")) {
+                    exeDir = codePath.getParent().toFile();
+                    assetsDir = new java.io.File(exeDir, "assets");
+                    if (assetsDir.exists() && assetsDir.isDirectory()) {
+                        return Gdx.files.absolute(new java.io.File(assetsDir, normalizedPath.substring("assets/".length())).getAbsolutePath());
+                    }
                 }
             }
         } catch (Exception ignored) {
             // If something goes wrong, fall through to the default behavior
         }
-        
-        // Fallback to default behavior
+
+        // Fallback to default behavior (Gdx will try from classpath)
         if (path.startsWith("assets/") || path.startsWith("assets\\")) {
-            return Gdx.files.local(path);
+            return Gdx.files.local(normalizedPath);
         } else {
-            return Gdx.files.local("assets/" + path);
+            return Gdx.files.local("assets/" + normalizedPath);
         }
     }
 }

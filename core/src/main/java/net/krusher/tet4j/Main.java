@@ -11,10 +11,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import net.krusher.tet4j.audio.MusicManager;
 import net.krusher.tet4j.entities.Board;
-import net.krusher.tet4j.gfx.BackgroundManager;
-import net.krusher.tet4j.gfx.BoardRenderer;
-import net.krusher.tet4j.gfx.InfoPanel;
-import net.krusher.tet4j.gfx.ParticleSystem;
+import net.krusher.tet4j.gfx.*;
 import net.krusher.tet4j.scenes.GameOverScene;
 import net.krusher.tet4j.scenes.PauseScene;
 import net.krusher.tet4j.scenes.PlayScene;
@@ -28,7 +25,7 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
     private ShapeRenderer shapes;
     private Board board;
-    private OrthographicCamera camera;
+    private GraphicsManager graphicsManager;
 
     private ParticleSystem particleSystem;
     private BackgroundManager backgroundManager;
@@ -36,7 +33,6 @@ public class Main extends ApplicationAdapter {
     private BoardRenderer boardRenderer;
     private InfoPanel infoPanel;
 
-    private Viewport viewport;
     private Settings settings;
 
     private SplashScene splashScene;
@@ -52,12 +48,24 @@ public class Main extends ApplicationAdapter {
         // Set up fullscreen mode if enabled
         if (settings.isFullscreenEnabled()) {
             Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        } else {
+            // Calculate window size as 90% of current screen resolution
+            com.badlogic.gdx.Graphics.DisplayMode displayMode = Gdx.graphics.getDisplayMode();
+            int windowWidth = (int) (displayMode.width * 0.9f);
+            int windowHeight = (int) (displayMode.height * 0.9f);
+
+            // Maintain the 16:9 aspect ratio
+            int calculatedHeight = (int) (windowWidth / 1.777f); // 16:9 ratio
+            if (calculatedHeight <= windowHeight) {
+                windowHeight = calculatedHeight;
+            } else {
+                windowWidth = (int) (windowHeight * 1.777f);
+            }
+
+            Gdx.graphics.setWindowedMode(windowWidth, windowHeight);
         }
 
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
-        viewport = new FitViewport(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT, camera);
-        viewport.apply();
+        graphicsManager = new GraphicsManager(settings);
 
         batch = new SpriteBatch();
         shapes = new ShapeRenderer();
@@ -78,26 +86,28 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height);
+        graphicsManager.resize(width, height);
     }
 
     @Override
     public void render() {
-        if ((Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT))
+if (!splashScene.isFinished()) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                Gdx.app.exit();
+            } else if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+                // Continue game logic here
+            }
+        } else if ((Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT))
             && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
             boolean full = !Gdx.graphics.isFullscreen();
-            if (full) {
-                Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-            } else {
-                Gdx.graphics.setWindowedMode(Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
-            }
+            graphicsManager.toggleFullscreen();
             settings.setFullscreenEnabled(full);
         }
         Gdx.gl.glClearColor(Constants.BOARD_BG.r, Constants.BOARD_BG.g, Constants.BOARD_BG.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        viewport.apply();
-        batch.setProjectionMatrix(camera.combined);
-        shapes.setProjectionMatrix(camera.combined);
+        graphicsManager.getViewport().apply();
+        batch.setProjectionMatrix(graphicsManager.getCamera().combined);
+        shapes.setProjectionMatrix(graphicsManager.getCamera().combined);
 
         float dt = Gdx.graphics.getDeltaTime();
         musicManager.updateToast(dt);

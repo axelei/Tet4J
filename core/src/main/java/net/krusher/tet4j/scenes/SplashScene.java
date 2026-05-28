@@ -41,7 +41,7 @@ public class SplashScene {
             }
         }
         musicManager.drawToast(batch, Assets.font);
-        if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.isTouched()) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             finished = true;
             musicManager.stopTitle();
             musicManager.playCurrentGm();

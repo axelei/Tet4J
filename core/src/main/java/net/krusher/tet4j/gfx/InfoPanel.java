@@ -120,6 +120,16 @@ public class InfoPanel {
         font.draw(batch, text, x, y);
     }
 
+    public void drawTextWithBgCentered(SpriteBatch batch, BitmapFont font, String text, float y) {
+        drawTextWithBgCentered(batch, font, text, y, Constants.TEXT_BG_PAD);
+    }
+
+    public void drawTextWithBgCentered(SpriteBatch batch, BitmapFont font, String text, float y, float extraBottomPad) {
+        glyphLayout.setText(font, text);
+        float x = (Constants.SCREEN_WIDTH - glyphLayout.width) / 2f;
+        drawTextWithBg(batch, font, text, x, y, extraBottomPad);
+    }
+
     public void drawPreview(SpriteBatch batch, BitmapFont font, Board board) {
         int px = Constants.INFO_X;
         int py = Constants.BOARD_Y + Constants.BOARD_PX_H - Constants.INFO_PREVIEW_TOP_OFFSET;
@@ -209,9 +219,13 @@ public class InfoPanel {
         shader.setUniformf("u_hue", (System.currentTimeMillis() % 20000L) / 1000f * 0.05f);
         batch.draw(Assets.logoTexture, logoX, logoY, logoW, logoH);
         batch.setShader(prev);
-        float pushX = Constants.SCREEN_WIDTH / 2f - Constants.SPLASH_TEXT_OFFSET_X;
-        drawTextWithBg(batch, bigFont, "push any key", pushX, Constants.SPLASH_TEXT_Y, Constants.TEXT_BG_PAD * 2);
-        drawTextWithBg(batch, font, "TET4K " + BuildInfo.VERSION + " by Krusher 2026, licensed under GPL 3", 20, 40, Constants.TEXT_BG_PAD * 2);
+        // Keep license text where it was (bottom left) - using constants
+        drawTextWithBg(batch, font, "TET4K " + BuildInfo.VERSION + " by Krusher 2026, licensed under GPL 3", 
+                      Constants.SPLASH_LICENSE_X, Constants.SPLASH_LICENSE_Y, Constants.TEXT_BG_PAD * 2);
+        
+        // Centered ESC text - using new centered drawing method
+        drawTextWithBgCentered(batch, bigFont, "press ESC to quit, SPACE to start", 
+                              Constants.SPLASH_INSTRUCTION_Y, Constants.TEXT_BG_PAD * 2);
         batch.end();
     }
 
