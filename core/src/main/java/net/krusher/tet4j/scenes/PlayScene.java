@@ -63,6 +63,7 @@ public class PlayScene implements Scene {
         BackgroundManager.draw(batch);
         BoardRenderer.drawBoardBackground(shapes);
         BoardRenderer.drawGame(batch, board, pauseScene.isAskingExit());
+        pauseScene.render();
     }
 
     @Override

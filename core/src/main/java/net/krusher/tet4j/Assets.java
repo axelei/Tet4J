@@ -2,12 +2,14 @@ package net.krusher.tet4j;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.Disposable;
 
 public class Assets {
 
@@ -29,6 +31,22 @@ public class Assets {
     public static Sound sfxSoftDrop;
     public static Sound sfxGameOver;
     public static Sound[] sfxClear = new Sound[4];
+
+    public interface FileResolver {
+        FileHandle resolve(String path);
+    }
+
+    public static FileResolver fileResolver = path -> {
+        String normalized = path.replace("\\", "/");
+        if (!normalized.startsWith("assets/")) {
+            normalized = "assets/" + normalized;
+        }
+        return Gdx.files.internal(normalized);
+    };
+
+    public static FileHandle file(String path) {
+        return fileResolver.resolve(path);
+    }
 
     public static void load() {
         FreeTypeFontGenerator fontGen = new FreeTypeFontGenerator(file("fonts/ModernDOS8x16.ttf"));
@@ -76,126 +94,36 @@ public class Assets {
         }
     }
 
-    public static void dispose() {
-        if (font != null) {
-            font.dispose();
-        }
-        if (bigFont != null) {
-            bigFont.dispose();
-        }
-        if (blockTextures != null) {
-            for (Texture t : blockTextures) {
-                if (t != null) {
-                    t.dispose();
-                }
-            }
-        }
-        if (ghostTexture != null) {
-            ghostTexture.dispose();
-        }
-        if (bgTexture != null) {
-            bgTexture.dispose();
-        }
-        if (relief != null) {
-            relief.dispose();
-        }
-        if (splashTexture != null) {
-            splashTexture.dispose();
-        }
-        if (logoTexture != null) {
-            logoTexture.dispose();
-        }
-        if (pixel != null) {
-            pixel.dispose();
-        }
-        if (sfxMove != null) {
-            sfxMove.dispose();
-        }
-        if (sfxRotate != null) {
-            sfxRotate.dispose();
-        }
-        if (sfxDrop != null) {
-            sfxDrop.dispose();
-        }
-        if (sfxSoftDrop != null) {
-            sfxSoftDrop.dispose();
-        }
-        if (sfxClear != null) {
-            for (Sound s : sfxClear) {
-                if (s != null) {
-                    s.dispose();
-                }
-            }
-        }
-        if (sfxGameOver != null) {
-            sfxGameOver.dispose();
-        }
-        if (glowShader != null) {
-            glowShader.dispose();
+    private static void disposeSafely(Disposable disposable) {
+        if (disposable != null) {
+            disposable.dispose();
         }
     }
 
-    public static com.badlogic.gdx.files.FileHandle file(String path) {
-        // Normalize path to forward slashes for consistency
-        String normalizedPath = path.replace("\\", "/");
-        if (!normalizedPath.startsWith("assets/")) {
-            normalizedPath = "assets/" + normalizedPath;
-        }
-
-        // Try 1: Current working directory (Gradle run task)
-        java.io.File assetsDir = new java.io.File("assets");
-        if (assetsDir.exists() && assetsDir.isDirectory()) {
-            return Gdx.files.local(normalizedPath);
-        }
-
-        // Try 2: Relative to user working directory
-        java.io.File userDir = new java.io.File(System.getProperty("user.dir"));
-        assetsDir = new java.io.File(userDir, "assets");
-        if (assetsDir.exists() && assetsDir.isDirectory()) {
-            return Gdx.files.local(normalizedPath);
-        }
-
-        // Try 3: Relative to executable/JAR location (for packaged builds)
-        try {
-            java.net.URL codeLocation = Assets.class.getProtectionDomain().getCodeSource().getLocation();
-            if (codeLocation != null) {
-                java.nio.file.Path codePath = new java.io.File(java.net.URLDecoder.decode(codeLocation.getPath(), "UTF-8")).toPath();
-
-                // Handle macOS app bundle structure (.app/Contents/MacOS/...)
-                if (codePath.toString().contains(".app/Contents/MacOS")) {
-                    // For macOS bundles: go up from .../Tet4J.app/Contents/MacOS/bin to .../Tet4J.app/Contents/MacOS
-                    java.io.File macOSDir = codePath.getParent().toFile();
-                    assetsDir = new java.io.File(macOSDir, "assets");
-                    if (assetsDir.exists() && assetsDir.isDirectory()) {
-                        return Gdx.files.absolute(new java.io.File(assetsDir, normalizedPath.substring("assets/".length())).getAbsolutePath());
-                    }
-                }
-
-                // Handle standard executable/JAR location
-                java.io.File exeDir = codePath.getParent().toFile();
-                assetsDir = new java.io.File(exeDir, "assets");
-                if (assetsDir.exists() && assetsDir.isDirectory()) {
-                    return Gdx.files.absolute(new java.io.File(assetsDir, normalizedPath.substring("assets/".length())).getAbsolutePath());
-                }
-
-                // For JAR files, try the directory containing the JAR
-                if (codePath.toString().endsWith(".jar")) {
-                    exeDir = codePath.getParent().toFile();
-                    assetsDir = new java.io.File(exeDir, "assets");
-                    if (assetsDir.exists() && assetsDir.isDirectory()) {
-                        return Gdx.files.absolute(new java.io.File(assetsDir, normalizedPath.substring("assets/".length())).getAbsolutePath());
-                    }
-                }
+    public static void dispose() {
+        disposeSafely(font);
+        disposeSafely(bigFont);
+        if (blockTextures != null) {
+            for (Texture t : blockTextures) {
+                disposeSafely(t);
             }
-        } catch (Exception ignored) {
-            // If something goes wrong, fall through to the default behavior
         }
-
-        // Fallback to default behavior (Gdx will try from classpath)
-        if (path.startsWith("assets/") || path.startsWith("assets\\")) {
-            return Gdx.files.local(normalizedPath);
-        } else {
-            return Gdx.files.local("assets/" + normalizedPath);
+        disposeSafely(ghostTexture);
+        disposeSafely(bgTexture);
+        disposeSafely(relief);
+        disposeSafely(splashTexture);
+        disposeSafely(logoTexture);
+        disposeSafely(pixel);
+        disposeSafely(sfxMove);
+        disposeSafely(sfxRotate);
+        disposeSafely(sfxDrop);
+        disposeSafely(sfxSoftDrop);
+        if (sfxClear != null) {
+            for (Sound s : sfxClear) {
+                disposeSafely(s);
+            }
         }
+        disposeSafely(sfxGameOver);
+        disposeSafely(glowShader);
     }
 }

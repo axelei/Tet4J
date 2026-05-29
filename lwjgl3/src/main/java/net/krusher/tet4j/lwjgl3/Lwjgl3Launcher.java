@@ -2,6 +2,7 @@ package net.krusher.tet4j.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Main;
 
 public class Lwjgl3Launcher {
@@ -20,6 +21,7 @@ public class Lwjgl3Launcher {
     }
 
     private static Lwjgl3Application createApplication() {
+        Assets.fileResolver = path -> new DesktopFileResolver().resolve(path);
         return new Lwjgl3Application(new Main(), getDefaultConfiguration());
     }
 

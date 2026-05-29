@@ -39,3 +39,26 @@ jobs:
         if: runner.os != 'Windows'
 
       - run: ${{ matrix.gradle }} build
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.0
+
+      - uses: actions/setup-java@v4.3.0
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ubuntu-gradle-web-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ubuntu-gradle-web-
+
+      - run: chmod +x gradlew
+
+      - run: ./gradlew :teavm:gdx_teavm_web_js_build
