@@ -36,11 +36,10 @@ public class Main extends ApplicationAdapter {
     public void create() {
 
         IS_WEB = Gdx.app.getType() == Application.ApplicationType.WebGL;
-
         settings = new Settings();
         GraphicsManager.init(settings);
 
-        if (Gdx.app.getType() != Application.ApplicationType.WebGL) {
+        if (!IS_WEB) {
             GraphicsManager.applyDisplayMode();
         }
 

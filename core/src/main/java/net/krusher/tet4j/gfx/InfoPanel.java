@@ -59,7 +59,7 @@ public final class InfoPanel {
         TextRenderer.drawTextWithBg(batch, Assets.font, "P: Pause", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP * 2);
         TextRenderer.drawTextWithBg(batch, Assets.font, "ESC: Exit", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP * 3);
         if (board.cheatMode) {
-            TextRenderer.drawTextWithBg(batch, Assets.font, "CHEATER!!", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP * 3);
+            TextRenderer.drawTextWithBg(batch, Assets.font, "CHEATER!!", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST + Constants.INFO_KEY_LABEL_STEP);
         }
     }
 

@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static net.krusher.tet4j.Main.IS_WEB;
+
 public final class MusicManager {
     private static Settings settings;
 
@@ -85,7 +87,7 @@ public final class MusicManager {
     }
 
     private static void playMusic(Music music) {
-        if (music != null && (Gdx.app.getType() == Application.ApplicationType.WebGL || settings.isMusicEnabled())) {
+        if (music != null && settings.isMusicEnabled()) {
             music.play();
         }
     }

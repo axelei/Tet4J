@@ -27,10 +27,6 @@ gdxTeaVM {
     }
 }
 
-tasks.matching { it.name.startsWith('gdx_teavm_') }.configureEach {
-    dependsOn 'generateMusicTags'
-}
-
 tasks.register('copyWebappIndex', Copy) {
     dependsOn 'generateJavaScript'
     from 'src/main/webapp/index.html'

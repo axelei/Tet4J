@@ -36,3 +36,14 @@ tasks.named('compileJava').configure {
 jar {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
+
+tasks.register('generateMusicTags', JavaExec) {
+  dependsOn ':util:compileJava'
+  classpath = files(project(':util').sourceSets.main.runtimeClasspath)
+  mainClass = 'net.krusher.tet4j.util.MetadataIndexer'
+  args rootProject.file('assets').absolutePath
+}
+
+tasks.named('compileJava') {
+  dependsOn 'generateMusicTags'
+}

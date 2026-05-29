@@ -284,13 +284,6 @@ tasks.register('convertMarkdownToHtml', JavaExec) {
     args rootFilesToInclude.collect { rootProject.file(it).absolutePath }
 }
 
-tasks.register('generateMusicTags', JavaExec) {
-    dependsOn ':util:compileJava'
-    classpath = files(project(':util').sourceSets.main.runtimeClasspath)
-    mainClass = 'net.krusher.tet4j.util.MetadataIndexer'
-    args rootProject.file('assets').absolutePath
-}
-
 tasks.named('dist') {
     dependsOn 'copyAssetsJar'
 }

@@ -38,7 +38,7 @@ public class SplashScene implements Scene {
 
     @Override
     public void handleInput() {
-        anyKey |= Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY);
+        anyKey |= Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY) || Gdx.input.justTouched();
 
         if (IS_WEB && anyKey && !audioStarted) {
             audioStarted = true;
