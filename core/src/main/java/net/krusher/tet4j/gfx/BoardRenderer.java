@@ -37,7 +37,7 @@ public final class BoardRenderer {
         shapes.end();
     }
 
-    public static void drawGame(SpriteBatch batch, Board board, ParticleSystem particles, InfoPanel infoPanel, boolean askingExit) {
+    public static void drawGame(SpriteBatch batch, Board board, boolean askingExit) {
 
         batch.begin();
         batch.enableBlending();
@@ -53,12 +53,12 @@ public final class BoardRenderer {
             drawGhost(batch, board);
             drawCurrentPiece(batch, board);
         }
-        if (!particles.isEmpty()) {
-            particles.draw(batch);
+        if (!ParticleSystem.isEmpty()) {
+            ParticleSystem.draw(batch);
         }
 
-        infoPanel.drawPreview(batch, board);
-        infoPanel.drawUI(batch, board);
+        InfoPanel.drawPreview(batch, board);
+        InfoPanel.drawUI(batch, board);
         if (board.state == Board.State.PAUSED && !askingExit) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);

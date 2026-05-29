@@ -27,8 +27,6 @@ public final class MusicManager {
     private static Music currentGm;
     private static float fadeOutTimer = -1f;
 
-    private static final Toast toast = new Toast();
-
     public static void init(Settings s) {
         settings = s;
 
@@ -147,19 +145,19 @@ public final class MusicManager {
 
     public static void showMusicToast(MusicMetadata meta) {
         if (!settings.isMusicEnabled() || meta == null) { return; }
-        toast.setText(meta.title() + "\nBy: " + meta.artist() + "\n" + meta.license());
+        Toast.setText(meta.title() + "\nBy: " + meta.artist() + "\n" + meta.license());
     }
 
     public static float getToastTimer() {
-        return toast.getTimer();
+        return Toast.getTimer();
     }
 
     public static void updateToast(float dt) {
-        toast.update(dt);
+        Toast.update(dt);
     }
 
     public static void drawToast(SpriteBatch batch, BitmapFont font) {
-        toast.draw(batch, font);
+        Toast.draw(batch, font);
     }
 
     public static void dispose() {

@@ -11,20 +11,20 @@ import net.krusher.tet4j.Constants;
 import net.krusher.tet4j.entities.Particle;
 import net.krusher.tet4j.entities.Tetromino;
 
-public class SplashBackground {
+public final class SplashBackground {
     private static final long START_TIME = System.currentTimeMillis();
     private static final Random rng = new Random();
     private static final int FALLING_COUNT = 15;
-    private final ArrayList<FallingPiece> fallingPieces = new ArrayList<>();
-    private final ArrayList<Particle> splashParticles = new ArrayList<>();
-    private float burstTimer = 8f + rng.nextFloat() * 4f;
+    private static final ArrayList<FallingPiece> fallingPieces = new ArrayList<>();
+    private static final ArrayList<Particle> splashParticles = new ArrayList<>();
+    private static float burstTimer = 8f + rng.nextFloat() * 4f;
 
     private static class FallingPiece {
         float x, y, size, speed;
         int type, rotation;
     }
 
-    public SplashBackground() {
+    public static void init() {
         for (int i = 0; i < FALLING_COUNT; i++) {
             FallingPiece p = new FallingPiece();
             resetFallingPiece(p);
@@ -43,7 +43,7 @@ public class SplashBackground {
         p.rotation = rng.nextInt(4);
     }
 
-    public void update(float dt) {
+    public static void update(float dt) {
         for (FallingPiece p : fallingPieces) {
             p.y -= p.speed * dt;
             if (p.y + p.size * 4f < -50f) {
@@ -83,7 +83,7 @@ public class SplashBackground {
         }
     }
 
-    private void burstFallingPiece(FallingPiece piece) {
+    private static void burstFallingPiece(FallingPiece piece) {
         int[][] shape = Tetromino.SHAPES[piece.type][piece.rotation];
         float bs = piece.size;
         for (int r = 0; r < 4; r++) {
@@ -97,7 +97,7 @@ public class SplashBackground {
         }
     }
 
-    public void draw(SpriteBatch batch) {
+    public static void draw(SpriteBatch batch) {
         batch.begin();
         batch.draw(Assets.splashTexture, 0, 0, Constants.SCREEN_WIDTH, Constants.SCREEN_HEIGHT);
         batch.setColor(1, 1, 1, 0.8f);
@@ -143,4 +143,6 @@ public class SplashBackground {
             Constants.SPLASH_INSTRUCTION_Y, Constants.TEXT_BG_PAD * 2);
         batch.end();
     }
+
+    private SplashBackground() {}
 }

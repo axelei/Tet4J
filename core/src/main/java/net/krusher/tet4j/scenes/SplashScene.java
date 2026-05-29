@@ -11,24 +11,22 @@ import net.krusher.tet4j.gfx.SplashBackground;
 
 public class SplashScene implements Scene {
     private final SpriteBatch batch;
-    private final SplashBackground splashBackground;
     private final Board board;
     private boolean finished;
 
-    public SplashScene(SpriteBatch batch, SplashBackground splashBackground, Board board) {
+    public SplashScene(SpriteBatch batch, Board board) {
         this.batch = batch;
-        this.splashBackground = splashBackground;
         this.board = board;
     }
 
     @Override
     public void update(float dt) {
-        splashBackground.update(dt);
+        SplashBackground.update(dt);
     }
 
     @Override
     public void render() {
-        splashBackground.draw(batch);
+        SplashBackground.draw(batch);
         if (!MusicManager.isTitlePlaying()) {
             MusicManager.playTitle();
             MusicManager.showMusicToast(MusicManager.getTitleMusicMeta());

@@ -32,7 +32,7 @@ public class Settings {
      */
     private void initializeDefaults() {
         for (DefaultSettings setting : DefaultSettings.values()) {
-            prefs.putBoolean(setting.name().toLowerCase(), setting.getDefaultValue());
+            prefs.putBoolean(setting.name(), setting.getDefaultValue());
         }
         prefs.flush();
     }

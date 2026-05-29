@@ -9,29 +9,28 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Constants;
 
-public class BackgroundManager {
-    private Texture currentBgTex;
-    private Texture prevBgTex;
-    private float bgFadeTimer = -1;
-    private int prevLevel = -1;
-    private final Color tintColor = new Color(1, 1, 1, 1);
-    private float currentLuminosity;
+public final class BackgroundManager {
+    private static Texture currentBgTex;
+    private static Texture prevBgTex;
+    private static float bgFadeTimer = -1;
+    private static int prevLevel = -1;
+    private static final Color tintColor = new Color(1, 1, 1, 1);
+    private static float currentLuminosity;
 
-    private final java.util.List<com.badlogic.gdx.files.FileHandle> masterQueue = new java.util.ArrayList<>();
+    private static final java.util.List<com.badlogic.gdx.files.FileHandle> masterQueue = new java.util.ArrayList<>();
 
-    public BackgroundManager() {
+    public static void init() {
         prevLevel = Constants.STARTING_LEVEL;
-        // Just in case we are changing the starting level.
         currentBgTex = Constants.STARTING_LEVEL < Constants.NUM_LEVEL_BG
             ? loadLevelTexture(Constants.STARTING_LEVEL)
             : loadMasterTexture();
     }
 
-    private Texture loadLevelTexture(int level) {
+    private static Texture loadLevelTexture(int level) {
         return loadTexture(Assets.file("backgrounds/level" + (level + 1) + ".jpg"));
     }
 
-    private void refillMasterQueue() {
+    private static void refillMasterQueue() {
         masterQueue.clear();
         for (com.badlogic.gdx.files.FileHandle f : Assets.file("backgrounds/master").list()) {
             String n = f.name().toLowerCase();
@@ -42,7 +41,7 @@ public class BackgroundManager {
         java.util.Collections.shuffle(masterQueue, new java.util.Random());
     }
 
-    private Texture loadMasterTexture() {
+    private static Texture loadMasterTexture() {
         if (masterQueue.isEmpty()) {
             refillMasterQueue();
         }
@@ -52,7 +51,7 @@ public class BackgroundManager {
         return loadTexture(masterQueue.removeFirst());
     }
 
-    private Texture loadTexture(com.badlogic.gdx.files.FileHandle file) {
+    private static Texture loadTexture(com.badlogic.gdx.files.FileHandle file) {
         Pixmap pm = new Pixmap(file);
         currentLuminosity = computeLuminosity(pm);
         Texture tex = new Texture(pm);
@@ -75,7 +74,7 @@ public class BackgroundManager {
         return count > 0 ? (float) total / count / 255f : 0.5f;
     }
 
-    public void update(float dt, int level) {
+    public static void update(float dt, int level) {
         if (bgFadeTimer >= 0) {
             bgFadeTimer += dt;
             if (bgFadeTimer >= Constants.BG_FADE_DURATION) {
@@ -104,7 +103,7 @@ public class BackgroundManager {
         generateTint();
     }
 
-    private void generateTint() {
+    private static void generateTint() {
         float h = (float) Math.random() * 360f;
         float l = Math.max(0.12f, Math.min(0.40f, 0.38f - currentLuminosity * 0.20f));
         hslToRgb(h, 0.75f, l, tintColor);
@@ -124,7 +123,7 @@ public class BackgroundManager {
         out.set(r + m, g + m, b + m, 1f);
     }
 
-    public void draw(SpriteBatch batch) {
+    public static void draw(SpriteBatch batch) {
         batch.begin();
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -151,7 +150,7 @@ public class BackgroundManager {
         batch.end();
     }
 
-    public void reset(int level) {
+    public static void reset(int level) {
         prevLevel = level;
         if (prevBgTex != null) { prevBgTex.dispose(); prevBgTex = null; }
         if (currentBgTex != null) { currentBgTex.dispose(); currentBgTex = null; }
@@ -160,8 +159,10 @@ public class BackgroundManager {
         bgFadeTimer = -1;
     }
 
-    public void dispose() {
+    public static void dispose() {
         if (currentBgTex != null) { currentBgTex.dispose(); currentBgTex = null; }
         if (prevBgTex != null) { prevBgTex.dispose(); prevBgTex = null; }
     }
+
+    private BackgroundManager() {}
 }

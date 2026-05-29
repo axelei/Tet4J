@@ -12,45 +12,36 @@ import net.krusher.tet4j.audio.MusicManager;
 import net.krusher.tet4j.gfx.BackgroundManager;
 import net.krusher.tet4j.gfx.BoardRenderer;
 import net.krusher.tet4j.gfx.GameOverOverlay;
-import net.krusher.tet4j.gfx.InfoPanel;
 import net.krusher.tet4j.gfx.ParticleSystem;
 
 public class GameOverScene implements Scene {
     private final SpriteBatch batch;
     private final ShapeRenderer shapes;
     private final Board board;
-    private final ParticleSystem particleSystem;
-    private final BackgroundManager backgroundManager;
-    private final InfoPanel infoPanel;
     private final SplashScene splashScene;
     private final Settings settings;
     private long gameOverSoundId = -1;
 
     public GameOverScene(SpriteBatch batch, ShapeRenderer shapes, Board board,
-                         ParticleSystem particleSystem, BackgroundManager backgroundManager,
-                         InfoPanel infoPanel,
                          SplashScene splashScene, Settings settings) {
         this.batch = batch;
         this.shapes = shapes;
         this.board = board;
-        this.particleSystem = particleSystem;
-        this.backgroundManager = backgroundManager;
-        this.infoPanel = infoPanel;
         this.splashScene = splashScene;
         this.settings = settings;
     }
 
     @Override
     public void update(float dt) {
-        particleSystem.update(dt);
+        ParticleSystem.update(dt);
         MusicManager.updateGameplayMusic(board.state);
     }
 
     @Override
     public void render() {
-        backgroundManager.draw(batch);
+        BackgroundManager.draw(batch);
         BoardRenderer.drawBoardBackground(shapes);
-        BoardRenderer.drawGame(batch, board, particleSystem, infoPanel, false);
+        BoardRenderer.drawGame(batch, board, false);
         GameOverOverlay.draw(batch, shapes);
     }
 
@@ -61,8 +52,8 @@ public class GameOverScene implements Scene {
                 Assets.sfxGameOver.stop(gameOverSoundId);
                 gameOverSoundId = -1;
             }
-            particleSystem.clear();
-            backgroundManager.reset(Constants.STARTING_LEVEL);
+            ParticleSystem.clear();
+            BackgroundManager.reset(Constants.STARTING_LEVEL);
             splashScene.reset();
         }
     }

@@ -6,28 +6,25 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Constants;
 
-public class Toast {
-    private final GlyphLayout glyphLayout = new GlyphLayout();
-    private String text;
-    private float timer = -1;
+public final class Toast {
+    private static final GlyphLayout glyphLayout = new GlyphLayout();
+    private static String text;
+    private static float timer = -1;
 
-    public Toast() {
-    }
-
-    public String getText() {
+    public static String getText() {
         return text;
     }
 
-    public float getTimer() {
+    public static float getTimer() {
         return timer;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public static void setText(String t) {
+        text = t;
         timer = 0;
     }
 
-    public void update(float dt) {
+    public static void update(float dt) {
         if (timer >= 0) {
             timer += dt;
             if (timer > Constants.TOAST_DURATION) {
@@ -36,7 +33,7 @@ public class Toast {
         }
     }
 
-    public void draw(SpriteBatch batch, BitmapFont font) {
+    public static void draw(SpriteBatch batch, BitmapFont font) {
         if (text == null || timer < 0) {
             return;
         }
@@ -70,4 +67,6 @@ public class Toast {
         batch.setColor(1, 1, 1, 1);
         batch.end();
     }
+
+    private Toast() {}
 }

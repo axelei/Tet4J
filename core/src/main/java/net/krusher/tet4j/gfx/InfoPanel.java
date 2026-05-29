@@ -1,21 +1,20 @@
 package net.krusher.tet4j.gfx;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Constants;
 import net.krusher.tet4j.entities.Board;
 import net.krusher.tet4j.entities.Tetromino;
 
-public class InfoPanel {
-    private float swingTimer;
+public final class InfoPanel {
+    private static float swingTimer;
 
-    public void update(float dt) {
+    public static void update(float dt) {
         swingTimer += dt;
     }
 
-    public void drawPreview(SpriteBatch batch, Board board) {
+    public static void drawPreview(SpriteBatch batch, Board board) {
         int px = Constants.INFO_X;
         int py = Constants.BOARD_Y + Constants.BOARD_PX_H - Constants.INFO_PREVIEW_TOP_OFFSET;
 
@@ -44,7 +43,7 @@ public class InfoPanel {
         }
     }
 
-    public void drawUI(SpriteBatch batch, Board board) {
+    public static void drawUI(SpriteBatch batch, Board board) {
         int px = Constants.INFO_X;
         int py = Constants.BOARD_Y + Constants.BOARD_PX_H - Constants.INFO_UI_TOP_OFFSET;
 
@@ -63,4 +62,6 @@ public class InfoPanel {
             TextRenderer.drawTextWithBg(batch, Assets.font, "CHEATER!!", Constants.INFO_X, Constants.INFO_KEY_LABEL_FIRST - Constants.INFO_KEY_LABEL_STEP * 3);
         }
     }
+
+    private InfoPanel() {}
 }

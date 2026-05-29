@@ -19,9 +19,6 @@ public class PlayScene implements Scene {
     private final SpriteBatch batch;
     private final ShapeRenderer shapes;
     private final Board board;
-    private final ParticleSystem particleSystem;
-    private final BackgroundManager backgroundManager;
-    private final InfoPanel infoPanel;
     private final PauseScene pauseScene;
     private final Settings settings;
 
@@ -30,15 +27,10 @@ public class PlayScene implements Scene {
     private float lastDt;
 
     public PlayScene(SpriteBatch batch, ShapeRenderer shapes, Board board,
-                     ParticleSystem particleSystem, BackgroundManager backgroundManager,
-                     InfoPanel infoPanel,
                      PauseScene pauseScene, Settings settings) {
         this.batch = batch;
         this.shapes = shapes;
         this.board = board;
-        this.particleSystem = particleSystem;
-        this.backgroundManager = backgroundManager;
-        this.infoPanel = infoPanel;
         this.pauseScene = pauseScene;
         this.settings = settings;
     }
@@ -52,7 +44,7 @@ public class PlayScene implements Scene {
             int idx = Math.clamp(board.linesCleared, 1, 4) - 1;
             playSfx(Assets.sfxClear[idx]);
             board.justCleared = false;
-            particleSystem.spawnClearingParticles(board);
+            ParticleSystem.spawnClearingParticles(board);
         }
 
         if (board.justLocked && !board.justGameOver) {
@@ -60,17 +52,17 @@ public class PlayScene implements Scene {
             board.justLocked = false;
         }
 
-        particleSystem.update(dt);
-        infoPanel.update(dt);
+        ParticleSystem.update(dt);
+        InfoPanel.update(dt);
         MusicManager.updateGameplayMusic(board.state);
-        backgroundManager.update(dt, board.level);
+        BackgroundManager.update(dt, board.level);
     }
 
     @Override
     public void render() {
-        backgroundManager.draw(batch);
+        BackgroundManager.draw(batch);
         BoardRenderer.drawBoardBackground(shapes);
-        BoardRenderer.drawGame(batch, board, particleSystem, infoPanel, pauseScene.isAskingExit());
+        BoardRenderer.drawGame(batch, board, pauseScene.isAskingExit());
     }
 
     @Override

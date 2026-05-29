@@ -10,13 +10,10 @@ import net.krusher.tet4j.entities.Particle;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParticleSystem {
-    private final List<Particle> particles = new ArrayList<>();
+public final class ParticleSystem {
+    private static final List<Particle> particles = new ArrayList<>();
 
-    public ParticleSystem() {
-    }
-
-    public void spawnClearingParticles(Board board) {
+    public static void spawnClearingParticles(Board board) {
         particles.clear();
         for (int r = 2; r < Constants.BOARD_ROWS; r++) {
             if (!board.clearedRows[r]) {
@@ -32,7 +29,7 @@ public class ParticleSystem {
         }
     }
 
-    public void update(float dt) {
+    public static void update(float dt) {
         float maxAge = Constants.CLEAR_DURATION * Constants.PARTICLE_MAX_AGE_MULTIPLIER;
         for (int i = particles.size() - 1; i >= 0; i--) {
             Particle p = particles.get(i);
@@ -45,7 +42,7 @@ public class ParticleSystem {
         }
     }
 
-    public void draw(SpriteBatch batch) {
+    public static void draw(SpriteBatch batch) {
         float maxAge = Constants.CLEAR_DURATION * Constants.PARTICLE_MAX_AGE_MULTIPLIER;
         for (Particle p : particles) {
             float a = Math.max(0, 1 - p.age / maxAge);
@@ -58,11 +55,13 @@ public class ParticleSystem {
         batch.setColor(1, 1, 1, 1);
     }
 
-    public void clear() {
+    public static void clear() {
         particles.clear();
     }
 
-    public boolean isEmpty() {
+    public static boolean isEmpty() {
         return particles.isEmpty();
     }
+
+    private ParticleSystem() {}
 }
