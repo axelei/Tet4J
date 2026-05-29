@@ -6,19 +6,24 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import net.krusher.tet4j.Assets;
+import net.krusher.tet4j.audio.MusicManager;
 import net.krusher.tet4j.entities.Board;
 import net.krusher.tet4j.Constants;
+import net.krusher.tet4j.gfx.BackgroundManager;
+import net.krusher.tet4j.gfx.ParticleSystem;
 
 public class PauseScene implements Scene {
     private final ShapeRenderer shapes;
     private final SpriteBatch batch;
     private final Board board;
+    private final SplashScene splashScene;
     private boolean askingExit;
 
-    public PauseScene(ShapeRenderer shapes, SpriteBatch batch, Board board) {
+    public PauseScene(ShapeRenderer shapes, SpriteBatch batch, Board board, SplashScene splashScene) {
         this.shapes = shapes;
         this.batch = batch;
         this.board = board;
+        this.splashScene = splashScene;
     }
 
     @Override
@@ -35,9 +40,9 @@ public class PauseScene implements Scene {
         shapes.setColor(0, 0, 0, Constants.PAUSE_OVERLAY_ALPHA);
         shapes.rect(Constants.BOARD_X, Constants.BOARD_Y, Constants.BOARD_PX_W, Constants.BOARD_PX_H);
         shapes.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
+        Gdx.gl.glEnable(GL20.GL_BLEND);
         batch.begin();
-        Assets.bigFont.draw(batch, "Quit?",
+        Assets.bigFont.draw(batch, "Give up?",
             Constants.BOARD_X + Constants.QUIT_PROMPT_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.TEXT_CENTER_Y_OFFSET_LARGE);
         Assets.font.draw(batch, "Y / N",
             Constants.BOARD_X + Constants.CONFIRM_PROMPT_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.TEXT_CENTER_Y_OFFSET_SMALL);
@@ -62,7 +67,14 @@ public class PauseScene implements Scene {
 
         if (askingExit) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.Y)) {
-                Gdx.app.exit();
+                if (MusicManager.isTitlePlaying()) {
+                    MusicManager.stopTitle();
+                }
+                MusicManager.stopCurrentGm();
+                ParticleSystem.clear();
+                BackgroundManager.reset(Constants.STARTING_LEVEL);
+                splashScene.reset();
+                askingExit = false;
             }
             if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
                 board.state = Board.State.PLAYING;

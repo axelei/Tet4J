@@ -25,17 +25,18 @@ Arrange falling shapes into complete rows to clear them from the board. As you c
 
 ## How to play
 
-| Key | Action |
-|---|---|
-| ← → / A D | Move piece |
-| ↑ / W | Rotate piece |
-| ↓ / S | Soft drop |
-| Space | Hard drop |
-| Space / Enter | Restart (game over) |
+| Key | Action             |
+|---|--------------------|
+| ← → / A D | Move piece         |
+| ↑ / W | Rotate piece       |
+| ↓ / S | Soft drop          |
+| Space | Hard drop          |
+| Alt+Enter | Switch full screen |
+| Alt+F4 | Quit immediately   |
 
 ## 🛠️ System Requirements
-* **Java Development Kit (JDK):** Version 24 or higher (only required if you are building from source).
-* **Operating System:** Windows, Linux, or macOS.
+* **Java Development Kit (JDK):** Version 21 or higher (only required if you are building from source).
+* **Operating System:** Windows, Linux, or macOS. (Or just a modern browser if playing the web version)
 * **Graphics Compatibility:** A graphics card supporting OpenGL 3.0 or higher.
 
 ---

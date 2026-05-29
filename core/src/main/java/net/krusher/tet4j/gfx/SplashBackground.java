@@ -11,13 +11,15 @@ import net.krusher.tet4j.Constants;
 import net.krusher.tet4j.entities.Particle;
 import net.krusher.tet4j.entities.Tetromino;
 
+import static net.krusher.tet4j.Main.IS_WEB;
+
 public final class SplashBackground {
     private static final long START_TIME = System.currentTimeMillis();
-    private static final Random rng = new Random();
+    private static final Random RNG = new Random();
     private static final int FALLING_COUNT = 15;
     private static final ArrayList<FallingPiece> fallingPieces = new ArrayList<>();
     private static final ArrayList<Particle> splashParticles = new ArrayList<>();
-    private static float burstTimer = 8f + rng.nextFloat() * 4f;
+    private static float burstTimer = 8f + RNG.nextFloat() * 4f;
 
     private static class FallingPiece {
         float x, y, size, speed;
@@ -28,19 +30,19 @@ public final class SplashBackground {
         for (int i = 0; i < FALLING_COUNT; i++) {
             FallingPiece p = new FallingPiece();
             resetFallingPiece(p);
-            p.y = rng.nextFloat() * Constants.SCREEN_HEIGHT;
-            p.x = rng.nextFloat() * (Constants.SCREEN_WIDTH + 200f) - 100f;
+            p.y = RNG.nextFloat() * Constants.SCREEN_HEIGHT;
+            p.x = RNG.nextFloat() * (Constants.SCREEN_WIDTH + 200f) - 100f;
             fallingPieces.add(p);
         }
     }
 
     private static void resetFallingPiece(FallingPiece p) {
-        p.x = rng.nextFloat() * (Constants.SCREEN_WIDTH + 200f) - 100f;
-        p.y = Constants.SCREEN_HEIGHT + 50f + rng.nextFloat() * 100f;
-        p.size = 20f + rng.nextFloat() * 40f;
-        p.speed = 30f + rng.nextFloat() * 60f;
-        p.type = rng.nextInt(7);
-        p.rotation = rng.nextInt(4);
+        p.x = RNG.nextFloat() * (Constants.SCREEN_WIDTH + 200f) - 100f;
+        p.y = Constants.SCREEN_HEIGHT + 50f + RNG.nextFloat() * 100f;
+        p.size = 20f + RNG.nextFloat() * 40f;
+        p.speed = 30f + RNG.nextFloat() * 60f;
+        p.type = RNG.nextInt(7);
+        p.rotation = RNG.nextInt(4);
     }
 
     public static void update(float dt) {
@@ -52,13 +54,13 @@ public final class SplashBackground {
         }
         burstTimer -= dt;
         if (burstTimer <= 0) {
-            burstTimer = 8f + rng.nextFloat() * 4f;
+            burstTimer = 8f + RNG.nextFloat() * 4f;
             FallingPiece target = null;
             int visibleCount = 0;
             for (FallingPiece fp : fallingPieces) {
                 if (fp.y > -50f && fp.y < Constants.SCREEN_HEIGHT + 50f) {
                     visibleCount++;
-                    if (rng.nextInt(visibleCount) == 0) {
+                    if (RNG.nextInt(visibleCount) == 0) {
                         target = fp;
                     }
                 }
@@ -137,9 +139,12 @@ public final class SplashBackground {
         shader.setUniformf("u_hue", (System.currentTimeMillis() % 20000L) / 1000f * 0.05f);
         batch.draw(Assets.logoTexture, logoX, logoY, logoW, logoH);
         batch.setShader(prev);
-        TextRenderer.drawTextWithBg(batch, Assets.font, "TET4K " + BuildInfo.VERSION + " by Krusher 2026, licensed under GPL 3",
+
+        String splashText = IS_WEB ? "press SPACE to start" : "SPACE to start, ESC to quit";
+
+        TextRenderer.drawTextWithBg(batch, Assets.font, "TET4J " + BuildInfo.VERSION + " by Krusher 2026, licensed under GPL 3",
             Constants.SPLASH_LICENSE_X, Constants.SPLASH_LICENSE_Y, Constants.TEXT_BG_PAD * 2);
-        TextRenderer.drawTextWithBgCentered(batch, Assets.bigFont, "press ESC to quit, SPACE to start",
+        TextRenderer.drawTextWithBgCentered(batch, Assets.bigFont, splashText,
             Constants.SPLASH_INSTRUCTION_Y, Constants.TEXT_BG_PAD * 2);
         batch.end();
     }

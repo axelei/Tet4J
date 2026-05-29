@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.Disposable;
 
 public class Assets {
 
@@ -93,62 +94,36 @@ public class Assets {
         }
     }
 
+    private static void disposeSafely(Disposable disposable) {
+        if (disposable != null) {
+            disposable.dispose();
+        }
+    }
+
     public static void dispose() {
-        if (font != null) {
-            font.dispose();
-        }
-        if (bigFont != null) {
-            bigFont.dispose();
-        }
+        disposeSafely(font);
+        disposeSafely(bigFont);
         if (blockTextures != null) {
             for (Texture t : blockTextures) {
-                if (t != null) {
-                    t.dispose();
-                }
+                disposeSafely(t);
             }
         }
-        if (ghostTexture != null) {
-            ghostTexture.dispose();
-        }
-        if (bgTexture != null) {
-            bgTexture.dispose();
-        }
-        if (relief != null) {
-            relief.dispose();
-        }
-        if (splashTexture != null) {
-            splashTexture.dispose();
-        }
-        if (logoTexture != null) {
-            logoTexture.dispose();
-        }
-        if (pixel != null) {
-            pixel.dispose();
-        }
-        if (sfxMove != null) {
-            sfxMove.dispose();
-        }
-        if (sfxRotate != null) {
-            sfxRotate.dispose();
-        }
-        if (sfxDrop != null) {
-            sfxDrop.dispose();
-        }
-        if (sfxSoftDrop != null) {
-            sfxSoftDrop.dispose();
-        }
+        disposeSafely(ghostTexture);
+        disposeSafely(bgTexture);
+        disposeSafely(relief);
+        disposeSafely(splashTexture);
+        disposeSafely(logoTexture);
+        disposeSafely(pixel);
+        disposeSafely(sfxMove);
+        disposeSafely(sfxRotate);
+        disposeSafely(sfxDrop);
+        disposeSafely(sfxSoftDrop);
         if (sfxClear != null) {
             for (Sound s : sfxClear) {
-                if (s != null) {
-                    s.dispose();
-                }
+                disposeSafely(s);
             }
         }
-        if (sfxGameOver != null) {
-            sfxGameOver.dispose();
-        }
-        if (glowShader != null) {
-            glowShader.dispose();
-        }
+        disposeSafely(sfxGameOver);
+        disposeSafely(glowShader);
     }
 }

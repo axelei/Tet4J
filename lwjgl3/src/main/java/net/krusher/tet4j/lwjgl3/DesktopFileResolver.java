@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import net.krusher.tet4j.Assets;
 
+import java.nio.charset.StandardCharsets;
+
 public class DesktopFileResolver implements Assets.FileResolver {
 
     @Override
@@ -32,7 +34,7 @@ public class DesktopFileResolver implements Assets.FileResolver {
         try {
             java.net.URL codeLocation = Assets.class.getProtectionDomain().getCodeSource().getLocation();
             if (codeLocation != null) {
-                java.nio.file.Path codePath = new java.io.File(java.net.URLDecoder.decode(codeLocation.getPath(), "UTF-8")).toPath();
+                java.nio.file.Path codePath = new java.io.File(java.net.URLDecoder.decode(codeLocation.getPath(), StandardCharsets.UTF_8)).toPath();
 
                 // Handle macOS app bundle structure (.app/Contents/MacOS/...)
                 if (codePath.toString().contains(".app/Contents/MacOS")) {

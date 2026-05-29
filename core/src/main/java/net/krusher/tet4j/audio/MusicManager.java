@@ -1,5 +1,6 @@
 package net.krusher.tet4j.audio;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.files.FileHandle;
@@ -84,7 +85,7 @@ public final class MusicManager {
     }
 
     private static void playMusic(Music music) {
-        if (music != null && settings.isMusicEnabled()) {
+        if (music != null && (Gdx.app.getType() == Application.ApplicationType.WebGL || settings.isMusicEnabled())) {
             music.play();
         }
     }
@@ -127,6 +128,15 @@ public final class MusicManager {
     private static void cancelFadeOut() {
         fadeOutTimer = -1f;
         if (currentGm != null) { currentGm.setVolume(Constants.GM_VOLUME); }
+    }
+
+    public static void stopCurrentGm() {
+        cancelFadeOut();
+        if (currentGm != null) {
+            currentGm.stop();
+            currentGm = null;
+            currentTrackPath = null;
+        }
     }
 
     public static void selectNextTrack() {
