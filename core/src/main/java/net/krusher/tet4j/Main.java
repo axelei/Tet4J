@@ -17,10 +17,6 @@ import net.krusher.tet4j.scenes.Scene;
 import net.krusher.tet4j.scenes.SplashScene;
 
 public class Main extends ApplicationAdapter {
-    static {
-        java.util.logging.Logger.getLogger("org.jaudiotagger").setLevel(java.util.logging.Level.WARNING);
-    }
-
     private SpriteBatch batch;
     private ShapeRenderer shapes;
     private Board board;

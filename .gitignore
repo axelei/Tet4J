@@ -167,3 +167,4 @@ Thumbs.db
 util/build
 *.log
 *.xmp
+assets/music/tags.csv

@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'com.github.xpenatan.gdx-teavm' version "$gdxTeavmVersion"
+}
+
+eclipse.project.name = appName + '-teavm'
+
+dependencies {
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.github.xpenatan.gdx-teavm:backend-web:$gdxTeavmVersion"
+    implementation "com.github.xpenatan.gdx-teavm:gdx-freetype-web:$gdxTeavmVersion"
+    implementation project(':core')
+}
+
+tasks.register('generateMusicTags', JavaExec) {
+    dependsOn ':util:compileJava'
+    classpath = files(project(':util').sourceSets.main.runtimeClasspath)
+    mainClass = 'net.krusher.tet4j.util.MetadataIndexer'
+    args rootProject.file('assets').absolutePath
+}
+
+gdxTeaVM {
+    assets(rootProject.file("assets").absolutePath)
+
+    js {
+        mainClass.set('net.krusher.tet4j.teavm.TeavmLauncher')
+    }
+}
+
+tasks.matching { it.name.startsWith('gdx_teavm_') }.configureEach {
+    dependsOn 'generateMusicTags'
+}
+
+tasks.register('copyWebappIndex', Copy) {
+    dependsOn 'generateJavaScript'
+    from 'src/main/webapp/index.html'
+    into layout.buildDirectory.dir("dist/web/webapp")
+    mustRunAfter 'generateJavaScript'
+}
+
+tasks.matching { it.name.startsWith('gdx_teavm_') }.configureEach {
+    dependsOn 'copyWebappIndex'
+}
