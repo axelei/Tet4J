@@ -16,40 +16,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MusicManager {
-    private final Settings settings;
+public final class MusicManager {
+    private static Settings settings;
 
-    private final Music titleMusic;
-    private final MusicMetadata titleMusicMeta;
+    private static Music titleMusic;
+    private static MusicMetadata titleMusicMeta;
 
-    private final List<Music> gameplayMusic = new ArrayList<>();
-    private final Map<Music, MusicMetadata> musicMeta = new HashMap<>();
-    private Music currentGm;
-    private float fadeOutTimer = -1f;
+    private static final List<Music> gameplayMusic = new ArrayList<>();
+    private static final Map<Music, MusicMetadata> musicMeta = new HashMap<>();
+    private static Music currentGm;
+    private static float fadeOutTimer = -1f;
 
-    private final Toast toast;
+    private static final Toast toast = new Toast();
 
-    public MusicManager(Settings settings) {
-        toast = new Toast();
-        this.settings = settings;
+    public static void init(Settings s) {
+        settings = s;
 
-        // Load title music by enumerating files at runtime
-        Music foundTitle = null;
-        MusicMetadata foundTitleMeta = null;
         FileHandle titleDir = Assets.file("music/title");
         if (titleDir.exists() && titleDir.isDirectory()) {
             for (FileHandle file : titleDir.list()) {
                 if (file.extension().equalsIgnoreCase("mp3") || file.extension().equalsIgnoreCase("ogg")) {
-                    foundTitle = Gdx.audio.newMusic(file);
-                    foundTitleMeta = MusicMetadata.fromFile(file);
+                    titleMusic = Gdx.audio.newMusic(file);
+                    titleMusicMeta = MusicMetadata.fromFile(file);
                     break;
                 }
             }
         }
-        titleMusic = foundTitle;
-        titleMusicMeta = foundTitleMeta;
 
-        // Load gameplay music by enumerating files at runtime
         FileHandle gameplayDir = Assets.file("music/gameplay");
         if (gameplayDir.exists() && gameplayDir.isDirectory()) {
             for (FileHandle file : gameplayDir.list()) {
@@ -63,60 +56,53 @@ public class MusicManager {
         selectNextTrack();
     }
 
-    public Music getTitleMusic() {
-        return titleMusic;
-    }
-
-    public MusicMetadata getTitleMusicMeta() {
+    public static MusicMetadata getTitleMusicMeta() {
         return titleMusicMeta;
     }
 
-    public boolean isTitlePlaying() {
+    public static boolean isTitlePlaying() {
         return titleMusic != null && titleMusic.isPlaying();
     }
 
-    // --- Music control ---
-
-    private void playMusic(Music music) {
-        if (music != null && settings.isMusicEnabled()) music.play();
+    private static void playMusic(Music music) {
+        if (music != null && settings.isMusicEnabled()) { music.play(); }
     }
 
-    public void playTitle() {
+    public static void playTitle() {
         playMusic(titleMusic);
     }
 
-    public void stopTitle() {
-        if (titleMusic != null) titleMusic.stop();
+    public static void stopTitle() {
+        if (titleMusic != null) { titleMusic.stop(); }
     }
 
-    public void update(float dt) {
-        if (fadeOutTimer < 0) return;
+    public static void update(float dt) {
+        if (fadeOutTimer < 0) { return; }
         fadeOutTimer += dt;
         if (fadeOutTimer >= Constants.GM_FADE_DURATION) {
-            if (currentGm != null) currentGm.stop();
+            if (currentGm != null) { currentGm.stop(); }
             fadeOutTimer = -1f;
         } else {
             float t = fadeOutTimer / Constants.GM_FADE_DURATION;
-            if (currentGm != null) currentGm.setVolume(Constants.GM_VOLUME * (1f - t));
+            if (currentGm != null) { currentGm.setVolume(Constants.GM_VOLUME * (1f - t)); }
         }
     }
 
-    public void playCurrentGm() {
-        if (currentGm == null) return;
+    public static void playCurrentGm() {
+        if (currentGm == null) { return; }
         cancelFadeOut();
         showMusicToast(musicMeta.get(currentGm));
         playMusic(currentGm);
     }
 
-    private void cancelFadeOut() {
+    private static void cancelFadeOut() {
         fadeOutTimer = -1f;
-        if (currentGm != null) currentGm.setVolume(Constants.GM_VOLUME);
+        if (currentGm != null) { currentGm.setVolume(Constants.GM_VOLUME); }
     }
 
-    /** Selects a random track (different from previous) and shows its toast. Does NOT play. */
-    public void selectNextTrack() {
+    public static void selectNextTrack() {
         cancelFadeOut();
-        if (currentGm != null) currentGm.stop();
+        if (currentGm != null) { currentGm.stop(); }
         if (gameplayMusic.isEmpty()) { currentGm = null; return; }
 
         Music previousTrack = currentGm;
@@ -131,9 +117,8 @@ public class MusicManager {
         showMusicToast(musicMeta.get(currentGm));
     }
 
-    /** Plays the current track if music is enabled, otherwise stops any playing track. */
-    private void ensureTrackPlaying() {
-        if (currentGm == null) return;
+    private static void ensureTrackPlaying() {
+        if (currentGm == null) { return; }
         if (settings.isMusicEnabled()) {
             currentGm.setVolume(Constants.GM_VOLUME);
             if (!currentGm.isPlaying()) {
@@ -145,50 +130,46 @@ public class MusicManager {
         }
     }
 
-    public void updateGameplayMusic(Board.State state) {
+    public static void updateGameplayMusic(Board.State state) {
         if (state == Board.State.GAME_OVER) {
             if (currentGm != null && currentGm.isPlaying() && fadeOutTimer < 0) {
                 fadeOutTimer = 0f;
             }
         } else if (state == Board.State.PLAYING) {
-            if (currentGm == null) return;
+            if (currentGm == null) { return; }
             ensureTrackPlaying();
         } else if (state == Board.State.PAUSED) {
-            if (currentGm == null) return;
+            if (currentGm == null) { return; }
             ensureTrackPlaying();
             currentGm.setVolume(Constants.GM_VOLUME_PAUSED);
         }
     }
 
-    // --- Toast ---
-
-    public void showMusicToast(MusicMetadata meta) {
-        if (!settings.isMusicEnabled() || meta == null) return;
-        toast.setText(meta.title + "\nBy: " + meta.artist + "\n" + meta.license);
+    public static void showMusicToast(MusicMetadata meta) {
+        if (!settings.isMusicEnabled() || meta == null) { return; }
+        toast.setText(meta.title() + "\nBy: " + meta.artist() + "\n" + meta.license());
     }
 
-    public String getToastText() {
-        return toast.getText();
-    }
-
-    public float getToastTimer() {
+    public static float getToastTimer() {
         return toast.getTimer();
     }
 
-    public void setToast(String text) {
-        toast.setText(text);
-    }
-
-    public void updateToast(float dt) {
+    public static void updateToast(float dt) {
         toast.update(dt);
     }
 
-    public void drawToast(SpriteBatch batch, BitmapFont font) {
+    public static void drawToast(SpriteBatch batch, BitmapFont font) {
         toast.draw(batch, font);
     }
 
-    public void dispose() {
-        if (titleMusic != null) titleMusic.dispose();
-        for (Music m : gameplayMusic) if (m != null) m.dispose();
+    public static void dispose() {
+        if (titleMusic != null) { titleMusic.dispose(); }
+        for (Music m : gameplayMusic) {
+            if (m != null) {
+                m.dispose();
+            }
+        }
     }
+
+    private MusicManager() {}
 }

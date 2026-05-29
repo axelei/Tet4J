@@ -6,10 +6,7 @@ import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 
-public class MusicMetadata {
-    public final String title;
-    public final String artist;
-    public final String license;
+public record MusicMetadata(String title, String artist, String license) {
 
     public MusicMetadata(String title, String artist, String license) {
         this.title = title != null ? title : "Unknown";
@@ -25,8 +22,12 @@ public class MusicMetadata {
             String t = tag.getFirst(FieldKey.TITLE);
             String a = tag.getFirst(FieldKey.ARTIST);
             String l = tag.getFirst(FieldKey.COPYRIGHT);
-            if (l == null || l.isEmpty()) l = tag.getFirst("LICENSE");
-            if (t == null || t.isEmpty()) t = fallback;
+            if (l == null || l.isEmpty()) {
+                l = tag.getFirst("LICENSE");
+            }
+            if (t == null || t.isEmpty()) {
+                t = fallback;
+            }
             return new MusicMetadata(t, a, l);
         } catch (Exception e) {
             return new MusicMetadata(file.nameWithoutExtension(), null, null);

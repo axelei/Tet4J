@@ -7,28 +7,38 @@ import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.entities.Board;
 import net.krusher.tet4j.entities.Tetromino;
 import net.krusher.tet4j.audio.MusicManager;
-import net.krusher.tet4j.gfx.InfoPanel;
+import net.krusher.tet4j.gfx.SplashBackground;
 
-public class SplashScene {
+public class SplashScene implements Scene {
     private final SpriteBatch batch;
-    private final InfoPanel infoPanel;
-    private final MusicManager musicManager;
+    private final SplashBackground splashBackground;
     private final Board board;
     private boolean finished;
 
-    public SplashScene(SpriteBatch batch, InfoPanel infoPanel, MusicManager musicManager, Board board) {
+    public SplashScene(SpriteBatch batch, SplashBackground splashBackground, Board board) {
         this.batch = batch;
-        this.infoPanel = infoPanel;
-        this.musicManager = musicManager;
+        this.splashBackground = splashBackground;
         this.board = board;
     }
 
+    @Override
+    public void update(float dt) {
+        splashBackground.update(dt);
+    }
+
+    @Override
     public void render() {
-        infoPanel.update(Gdx.graphics.getDeltaTime());
-        infoPanel.drawSplash(batch, Assets.bigFont, Assets.font);
-        if (!musicManager.isTitlePlaying()) {
-            musicManager.playTitle();
-            musicManager.showMusicToast(musicManager.getTitleMusicMeta());
+        splashBackground.draw(batch);
+        if (!MusicManager.isTitlePlaying()) {
+            MusicManager.playTitle();
+            MusicManager.showMusicToast(MusicManager.getTitleMusicMeta());
+        }
+    }
+
+    @Override
+    public void handleInput() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            Gdx.app.exit();
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.F12)) {
             board.cheatMode = !board.cheatMode;
@@ -40,15 +50,20 @@ public class SplashScene {
                 board.currentRotation = 0;
             }
         }
-        musicManager.drawToast(batch, Assets.font);
-        if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.isTouched()) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             finished = true;
-            musicManager.stopTitle();
-            musicManager.playCurrentGm();
+            MusicManager.stopTitle();
+            board.reset();
+            MusicManager.selectNextTrack();
+            MusicManager.playCurrentGm();
         }
     }
 
     public boolean isFinished() {
         return finished;
+    }
+
+    public void reset() {
+        finished = false;
     }
 }

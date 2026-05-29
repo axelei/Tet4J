@@ -5,6 +5,7 @@ import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.entities.Block;
 import net.krusher.tet4j.entities.Board;
 import net.krusher.tet4j.Constants;
+import net.krusher.tet4j.entities.Particle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +19,14 @@ public class ParticleSystem {
     public void spawnClearingParticles(Board board) {
         particles.clear();
         for (int r = 2; r < Constants.BOARD_ROWS; r++) {
-            if (!board.clearedRows[r]) continue;
+            if (!board.clearedRows[r]) {
+                continue;
+            }
             for (int c = 0; c < Constants.BOARD_COLS; c++) {
                 Block block = board.grid[r][c];
-                if (block == null) continue;
+                if (block == null) {
+                    continue;
+                }
                 particles.add(new Particle(block, c, r));
             }
         }

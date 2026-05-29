@@ -98,9 +98,10 @@ public class Constants {
     public static final int PAUSED_LABEL_X = 60;
     public static final int PAUSED_LABEL_Y = 24;
 
-    public static final int SPLASH_TEXT_OFFSET_X = 225;
-    public static final int SPLASH_TEXT_Y = 150;
-
     public static final int GAME_OVER_LABEL_X = 30;
     public static final int RESTART_PROMPT_X = 68;
+
+    public static final int SPLASH_LICENSE_X = 20;
+    public static final int SPLASH_LICENSE_Y = 40;
+    public static final int SPLASH_INSTRUCTION_Y = 420;
 }

@@ -35,14 +35,20 @@ public class BackgroundManager {
         masterQueue.clear();
         for (com.badlogic.gdx.files.FileHandle f : Assets.file("backgrounds/master").list()) {
             String n = f.name().toLowerCase();
-            if (n.endsWith(".jpg") || n.endsWith(".png")) masterQueue.add(f);
+            if (n.endsWith(".jpg") || n.endsWith(".png")) {
+                masterQueue.add(f);
+            }
         }
         java.util.Collections.shuffle(masterQueue, new java.util.Random());
     }
 
     private Texture loadMasterTexture() {
-        if (masterQueue.isEmpty()) refillMasterQueue();
-        if (masterQueue.isEmpty()) return loadLevelTexture(0);
+        if (masterQueue.isEmpty()) {
+            refillMasterQueue();
+        }
+        if (masterQueue.isEmpty()) {
+            return loadLevelTexture(0);
+        }
         return loadTexture(masterQueue.removeFirst());
     }
 
@@ -81,7 +87,9 @@ public class BackgroundManager {
             }
         }
 
-        if (level == prevLevel) return;
+        if (level == prevLevel) {
+            return;
+        }
         prevLevel = level;
 
         if (prevBgTex != null) {

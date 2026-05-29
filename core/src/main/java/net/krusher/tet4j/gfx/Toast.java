@@ -30,12 +30,16 @@ public class Toast {
     public void update(float dt) {
         if (timer >= 0) {
             timer += dt;
-            if (timer > Constants.TOAST_DURATION) timer = -1;
+            if (timer > Constants.TOAST_DURATION) {
+                timer = -1;
+            }
         }
     }
 
     public void draw(SpriteBatch batch, BitmapFont font) {
-        if (text == null || timer < 0) return;
+        if (text == null || timer < 0) {
+            return;
+        }
 
         glyphLayout.setText(font, text, com.badlogic.gdx.graphics.Color.WHITE, Constants.TOAST_MAX_WIDTH,
             com.badlogic.gdx.utils.Align.left, true);
