@@ -4,17 +4,19 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import net.krusher.tet4j.audio.MusicManager;
 import net.krusher.tet4j.entities.Board;
-import net.krusher.tet4j.gfx.*;
+import net.krusher.tet4j.gfx.BackgroundManager;
+import net.krusher.tet4j.gfx.GraphicsManager;
+import net.krusher.tet4j.gfx.InfoPanel;
+import net.krusher.tet4j.gfx.ParticleSystem;
+import net.krusher.tet4j.gfx.SplashBackground;
 import net.krusher.tet4j.scenes.GameOverScene;
 import net.krusher.tet4j.scenes.PauseScene;
 import net.krusher.tet4j.scenes.PlayScene;
+import net.krusher.tet4j.scenes.Scene;
 import net.krusher.tet4j.scenes.SplashScene;
 
 public class Main extends ApplicationAdapter {
@@ -29,43 +31,22 @@ public class Main extends ApplicationAdapter {
 
     private ParticleSystem particleSystem;
     private BackgroundManager backgroundManager;
-    private MusicManager musicManager;
-    private BoardRenderer boardRenderer;
+    private SplashBackground splashBackground;
     private InfoPanel infoPanel;
 
     private Settings settings;
 
+    private Scene activeScene;
     private SplashScene splashScene;
     private PlayScene playScene;
     private GameOverScene gameOverScene;
-    private PauseScene pauseScene;
 
     @Override
     public void create() {
-        // Initialize settings
         settings = new Settings();
-
-        // Set up fullscreen mode if enabled
-        if (settings.isFullscreenEnabled()) {
-            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
-        } else {
-            // Calculate window size as 90% of current screen resolution
-            com.badlogic.gdx.Graphics.DisplayMode displayMode = Gdx.graphics.getDisplayMode();
-            int windowWidth = (int) (displayMode.width * 0.9f);
-            int windowHeight = (int) (displayMode.height * 0.9f);
-
-            // Maintain the 16:9 aspect ratio
-            int calculatedHeight = (int) (windowWidth / 1.777f); // 16:9 ratio
-            if (calculatedHeight <= windowHeight) {
-                windowHeight = calculatedHeight;
-            } else {
-                windowWidth = (int) (windowHeight * 1.777f);
-            }
-
-            Gdx.graphics.setWindowedMode(windowWidth, windowHeight);
-        }
-
         graphicsManager = new GraphicsManager(settings);
+
+        graphicsManager.applyDisplayMode();
 
         batch = new SpriteBatch();
         shapes = new ShapeRenderer();
@@ -74,14 +55,16 @@ public class Main extends ApplicationAdapter {
         board = new Board();
         particleSystem = new ParticleSystem();
         backgroundManager = new BackgroundManager();
-        musicManager = new MusicManager(settings);
-        boardRenderer = new BoardRenderer();
+        MusicManager.init(settings);
+        splashBackground = new SplashBackground();
         infoPanel = new InfoPanel();
 
-        splashScene = new SplashScene(batch, infoPanel, musicManager, board);
-        playScene = new PlayScene(batch, shapes, board, particleSystem, backgroundManager, musicManager, boardRenderer, infoPanel, settings);
-        gameOverScene = new GameOverScene(batch, shapes, board, infoPanel, particleSystem, backgroundManager, musicManager, settings);
-        pauseScene = new PauseScene(shapes, batch);
+        splashScene = new SplashScene(batch, splashBackground, board);
+        PauseScene pauseScene = new PauseScene(shapes, batch, board);
+        playScene = new PlayScene(batch, shapes, board, particleSystem, backgroundManager, infoPanel, pauseScene, settings);
+        gameOverScene = new GameOverScene(batch, shapes, board, particleSystem, backgroundManager, infoPanel, splashScene, settings);
+
+        activeScene = splashScene;
     }
 
     @Override
@@ -91,18 +74,11 @@ public class Main extends ApplicationAdapter {
 
     @Override
     public void render() {
-if (!splashScene.isFinished()) {
-            if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-                Gdx.app.exit();
-            } else if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-                // Continue game logic here
-            }
-        } else if ((Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT))
+        if ((Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.ALT_RIGHT))
             && Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            boolean full = !Gdx.graphics.isFullscreen();
             graphicsManager.toggleFullscreen();
-            settings.setFullscreenEnabled(full);
         }
+
         Gdx.gl.glClearColor(Constants.BOARD_BG.r, Constants.BOARD_BG.g, Constants.BOARD_BG.b, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         graphicsManager.getViewport().apply();
@@ -110,45 +86,29 @@ if (!splashScene.isFinished()) {
         shapes.setProjectionMatrix(graphicsManager.getCamera().combined);
 
         float dt = Gdx.graphics.getDeltaTime();
-        musicManager.updateToast(dt);
-        musicManager.update(dt);
+        MusicManager.updateToast(dt);
+        MusicManager.update(dt);
 
-        if (!splashScene.isFinished()) {
-            splashScene.render();
-            return;
+        activeScene.update(dt);
+        activeScene.render();
+        activeScene.handleInput();
+
+        if (activeScene == splashScene && splashScene.isFinished()) {
+            activeScene = playScene;
         }
-
-        handleInput(dt);
-        board.update(dt);
-
-        if (board.justGameOver) {
+        if (activeScene == playScene && board.justGameOver) {
             gameOverScene.playGameOverSound();
             board.justGameOver = false;
             board.justLocked = false;
+            activeScene = gameOverScene;
+        }
+        if (activeScene == gameOverScene && !splashScene.isFinished()) {
+            activeScene = splashScene;
         }
 
-        playScene.processEvents(dt);
-        playScene.render(pauseScene.isAskingExit());
-        if (board.state == Board.State.GAME_OVER) {
-            gameOverScene.render();
-        } else {
-            pauseScene.render();
+        if (MusicManager.getToastTimer() >= 0) {
+            MusicManager.drawToast(batch, Assets.font);
         }
-        if (musicManager.getToastTimer() >= 0) musicManager.drawToast(batch, Assets.font);
-    }
-
-    private void handleInput(float dt) {
-        pauseScene.handleInput(board);
-        if (pauseScene.isAskingExit()) return;
-
-        if (board.state == Board.State.GAME_OVER) {
-            gameOverScene.handleInput();
-            return;
-        }
-
-        if (board.state != Board.State.PLAYING) return;
-
-        playScene.handleInput(dt);
     }
 
     @Override
@@ -158,6 +118,6 @@ if (!splashScene.isFinished()) {
         shapes.dispose();
         Assets.dispose();
         backgroundManager.dispose();
-        musicManager.dispose();
+        MusicManager.dispose();
     }
 }

@@ -15,38 +15,79 @@ import net.krusher.tet4j.gfx.BoardRenderer;
 import net.krusher.tet4j.gfx.InfoPanel;
 import net.krusher.tet4j.gfx.ParticleSystem;
 
-public class PlayScene {
+public class PlayScene implements Scene {
     private final SpriteBatch batch;
     private final ShapeRenderer shapes;
     private final Board board;
     private final ParticleSystem particleSystem;
     private final BackgroundManager backgroundManager;
-    private final MusicManager musicManager;
-    private final BoardRenderer boardRenderer;
     private final InfoPanel infoPanel;
+    private final PauseScene pauseScene;
     private final Settings settings;
 
     private float moveTimer, dropTimer;
     private int moveDir;
+    private float lastDt;
 
     public PlayScene(SpriteBatch batch, ShapeRenderer shapes, Board board,
                      ParticleSystem particleSystem, BackgroundManager backgroundManager,
-                     MusicManager musicManager, BoardRenderer boardRenderer,
-                     InfoPanel infoPanel, Settings settings) {
+                     InfoPanel infoPanel,
+                     PauseScene pauseScene, Settings settings) {
         this.batch = batch;
         this.shapes = shapes;
         this.board = board;
         this.particleSystem = particleSystem;
         this.backgroundManager = backgroundManager;
-        this.musicManager = musicManager;
-        this.boardRenderer = boardRenderer;
         this.infoPanel = infoPanel;
+        this.pauseScene = pauseScene;
         this.settings = settings;
     }
 
-    public void handleInput(float dt) {
+    @Override
+    public void update(float dt) {
+        lastDt = dt;
+        board.update(dt);
+
+        if (board.justCleared && !board.justGameOver) {
+            int idx = Math.clamp(board.linesCleared, 1, 4) - 1;
+            playSfx(Assets.sfxClear[idx]);
+            board.justCleared = false;
+            particleSystem.spawnClearingParticles(board);
+        }
+
+        if (board.justLocked && !board.justGameOver) {
+            playSfx(Assets.sfxSoftDrop, piecePan(board.lockX));
+            board.justLocked = false;
+        }
+
+        particleSystem.update(dt);
+        infoPanel.update(dt);
+        MusicManager.updateGameplayMusic(board.state);
+        backgroundManager.update(dt, board.level);
+    }
+
+    @Override
+    public void render() {
+        backgroundManager.draw(batch);
+        BoardRenderer.drawBoardBackground(shapes);
+        BoardRenderer.drawGame(batch, board, particleSystem, infoPanel, pauseScene.isAskingExit());
+    }
+
+    @Override
+    public void handleInput() {
+        pauseScene.handleInput();
+        if (pauseScene.isAskingExit()) {
+            return;
+        }
+        if (board.state != Board.State.PLAYING) {
+            return;
+        }
+
+        float dt = lastDt;
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP) || Gdx.input.isKeyJustPressed(Input.Keys.W)) {
-            if (board.rotateCW()) playSfx(Assets.sfxRotate, piecePan());
+            if (board.rotateCW()) {
+                playSfx(Assets.sfxRotate, piecePan());
+            }
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
@@ -68,15 +109,20 @@ public class PlayScene {
         }
 
         int dir = 0;
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) dir = -1;
-        else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) dir = 1;
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT) || Gdx.input.isKeyPressed(Input.Keys.A)) {
+            dir = -1;
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT) || Gdx.input.isKeyPressed(Input.Keys.D)) {
+            dir = 1;
+        }
 
         if (dir != 0) {
             if (moveDir != dir) {
                 moveDir = dir;
                 moveTimer = 0;
                 boolean moved = dir < 0 ? board.moveLeft() : board.moveRight();
-                if (moved) playSfx(Assets.sfxMove, piecePan());
+                if (moved) {
+                    playSfx(Assets.sfxMove, piecePan());
+                }
             } else {
                 moveTimer += dt;
                 if (moveTimer >= Constants.DAS_DELAY) {
@@ -84,7 +130,9 @@ public class PlayScene {
                     float repeat = moveTimer - Constants.DAS_DELAY;
                     int count = (int)(repeat / Constants.DAS_REPEAT);
                     int prevCount = (int)((repeat - dt) / Constants.DAS_REPEAT);
-                    if (moved && count > prevCount) playSfx(Assets.sfxMove, piecePan());
+                    if (moved && count > prevCount) {
+                        playSfx(Assets.sfxMove, piecePan());
+                    }
                 }
             }
         } else {
@@ -93,44 +141,23 @@ public class PlayScene {
         }
     }
 
-    public void processEvents(float dt) {
-        if (board.justCleared) {
-            int idx = Math.clamp(board.linesCleared, 1, 4) - 1;
-            playSfx(Assets.sfxClear[idx]);
-            board.justCleared = false;
-            particleSystem.spawnClearingParticles(board);
-        }
-
-        if (board.justLocked) {
-            playSfx(Assets.sfxSoftDrop, piecePan(board.lockX));
-            board.justLocked = false;
-        }
-
-        particleSystem.update(dt);
-        infoPanel.update(dt);
-        musicManager.updateGameplayMusic(board.state);
-        backgroundManager.update(dt, board.level);
-    }
-
-    public void render(boolean askingExit) {
-        backgroundManager.draw(batch);
-        boardRenderer.drawBoardBackground(shapes);
-        boardRenderer.drawGame(batch, Assets.bigFont, board, particleSystem, infoPanel, Assets.font, askingExit);
-    }
-
     private void playSfx(Sound sound) {
-        if (sound != null && settings.isSoundEffectsEnabled()) sound.play();
+        if (sound != null && settings.isSoundEffectsEnabled()) {
+            sound.play();
+        }
     }
 
     private void playSfx(Sound sound, float pan) {
-        if (sound != null && settings.isSoundEffectsEnabled()) sound.play(1f, 1f, pan);
+        if (sound != null && settings.isSoundEffectsEnabled()) {
+            sound.play(1f, 1f, pan);
+        }
     }
 
     private float piecePan() {
         return piecePan(board.currentX);
     }
 
-    private float piecePan(float x) {
+    private static float piecePan(float x) {
         float maxCol = Constants.BOARD_COLS - 1f;
         return ((x / maxCol) * 2f - 1f) * Constants.PAN_HARDNESS;
     }

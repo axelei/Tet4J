@@ -45,8 +45,9 @@ public class Assets {
         sfxRotate = Gdx.audio.newSound(file("sounds/rotate.ogg"));
         sfxDrop = Gdx.audio.newSound(file("sounds/drop.ogg"));
         sfxSoftDrop = Gdx.audio.newSound(file("sounds/softdrop.ogg"));
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++) {
             sfxClear[i] = Gdx.audio.newSound(file("sounds/clear" + (i + 1) + ".ogg"));
+        }
         sfxGameOver = Gdx.audio.newSound(file("sounds/gameover.ogg"));
 
         String[] blockFiles = {"block_i.png", "block_o.png", "block_t.png",
@@ -76,22 +77,62 @@ public class Assets {
     }
 
     public static void dispose() {
-        if (font != null) font.dispose();
-        if (bigFont != null) bigFont.dispose();
-        if (blockTextures != null) for (Texture t : blockTextures) if (t != null) t.dispose();
-        if (ghostTexture != null) ghostTexture.dispose();
-        if (bgTexture != null) bgTexture.dispose();
-        if (relief != null) relief.dispose();
-        if (splashTexture != null) splashTexture.dispose();
-        if (logoTexture != null) logoTexture.dispose();
-        if (pixel != null) pixel.dispose();
-        if (sfxMove != null) sfxMove.dispose();
-        if (sfxRotate != null) sfxRotate.dispose();
-        if (sfxDrop != null) sfxDrop.dispose();
-        if (sfxSoftDrop != null) sfxSoftDrop.dispose();
-        if (sfxClear != null) for (Sound s : sfxClear) if (s != null) s.dispose();
-        if (sfxGameOver != null) sfxGameOver.dispose();
-        if (glowShader != null) glowShader.dispose();
+        if (font != null) {
+            font.dispose();
+        }
+        if (bigFont != null) {
+            bigFont.dispose();
+        }
+        if (blockTextures != null) {
+            for (Texture t : blockTextures) {
+                if (t != null) {
+                    t.dispose();
+                }
+            }
+        }
+        if (ghostTexture != null) {
+            ghostTexture.dispose();
+        }
+        if (bgTexture != null) {
+            bgTexture.dispose();
+        }
+        if (relief != null) {
+            relief.dispose();
+        }
+        if (splashTexture != null) {
+            splashTexture.dispose();
+        }
+        if (logoTexture != null) {
+            logoTexture.dispose();
+        }
+        if (pixel != null) {
+            pixel.dispose();
+        }
+        if (sfxMove != null) {
+            sfxMove.dispose();
+        }
+        if (sfxRotate != null) {
+            sfxRotate.dispose();
+        }
+        if (sfxDrop != null) {
+            sfxDrop.dispose();
+        }
+        if (sfxSoftDrop != null) {
+            sfxSoftDrop.dispose();
+        }
+        if (sfxClear != null) {
+            for (Sound s : sfxClear) {
+                if (s != null) {
+                    s.dispose();
+                }
+            }
+        }
+        if (sfxGameOver != null) {
+            sfxGameOver.dispose();
+        }
+        if (glowShader != null) {
+            glowShader.dispose();
+        }
     }
 
     public static com.badlogic.gdx.files.FileHandle file(String path) {

@@ -24,23 +24,34 @@ public class GraphicsManager {
         viewport.apply();
     }
 
+    public void applyDisplayMode() {
+        if (settings.isFullscreenEnabled()) {
+            setFullscreenMode();
+        } else {
+            setWindowedMode();
+        }
+    }
+
     public void toggleFullscreen() {
         boolean full = !Gdx.graphics.isFullscreen();
         if (full) {
-            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+            setFullscreenMode();
         } else {
             setWindowedMode();
         }
         settings.setFullscreenEnabled(full);
     }
 
-    public void setWindowedMode() {
+    public static void setFullscreenMode() {
+        Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+    }
+
+    public static void setWindowedMode() {
         com.badlogic.gdx.Graphics.DisplayMode displayMode = Gdx.graphics.getDisplayMode();
         int windowWidth = (int) (displayMode.width * 0.9f);
         int windowHeight = (int) (displayMode.height * 0.9f);
 
-        // Maintain the 16:9 aspect ratio
-        int calculatedHeight = (int) (windowWidth / 1.777f); // 16:9 ratio
+        int calculatedHeight = (int) (windowWidth / 1.777f);
         if (calculatedHeight <= windowHeight) {
             windowHeight = calculatedHeight;
         } else {

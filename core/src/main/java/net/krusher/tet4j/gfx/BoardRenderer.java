@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -15,23 +14,9 @@ import net.krusher.tet4j.Constants;
 import net.krusher.tet4j.entities.Tetromino;
 import net.krusher.tet4j.entities.Tetromino.Type;
 
-public class BoardRenderer {
-    private final Sprite bgSprite;
+public final class BoardRenderer {
 
-    public BoardRenderer() {
-        bgSprite = new Sprite(Assets.bgTexture);
-        bgSprite.setPosition(Constants.BOARD_X, Constants.BOARD_Y);
-        bgSprite.setSize(Constants.BOARD_PX_W, Constants.BOARD_PX_H);
-    }
-
-    private void drawBlock(SpriteBatch batch, Texture tex, float x, float y, float rotation, boolean drawRelief) {
-        float half = Constants.BLOCK_SIZE / 2f;
-        batch.draw(tex, x, y, half, half, Constants.BLOCK_SIZE, Constants.BLOCK_SIZE,
-            1, 1, rotation, 0, 0, tex.getWidth(), tex.getHeight(), false, false);
-        if (drawRelief) batch.draw(Assets.relief, x, y, Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);
-    }
-
-    public void drawBoardBackground(ShapeRenderer shapes) {
+    public static void drawBoardBackground(ShapeRenderer shapes) {
         int bx = Constants.BOARD_X;
         int by = Constants.BOARD_Y;
         int bw = Constants.BOARD_PX_W;
@@ -52,7 +37,7 @@ public class BoardRenderer {
         shapes.end();
     }
 
-    public void drawGame(SpriteBatch batch, BitmapFont bigFont, Board board, ParticleSystem particles, InfoPanel infoPanel, BitmapFont font, boolean askingExit) {
+    public static void drawGame(SpriteBatch batch, Board board, ParticleSystem particles, InfoPanel infoPanel, boolean askingExit) {
 
         batch.begin();
         batch.enableBlending();
@@ -68,22 +53,33 @@ public class BoardRenderer {
             drawGhost(batch, board);
             drawCurrentPiece(batch, board);
         }
-        if (!particles.isEmpty()) particles.draw(batch);
+        if (!particles.isEmpty()) {
+            particles.draw(batch);
+        }
 
-        infoPanel.drawPreview(batch, font, board);
-        infoPanel.drawUI(batch, font, bigFont, board);
+        infoPanel.drawPreview(batch, board);
+        infoPanel.drawUI(batch, board);
         if (board.state == Board.State.PAUSED && !askingExit) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             batch.setColor(0, 0, 0, Constants.PAUSE_OVERLAY_ALPHA);
             batch.draw(Assets.pixel, Constants.BOARD_X, Constants.BOARD_Y, Constants.BOARD_PX_W, Constants.BOARD_PX_H);
             batch.setColor(1, 1, 1, 1);
-            bigFont.draw(batch, "PAUSED", Constants.BOARD_X + Constants.PAUSED_LABEL_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.PAUSED_LABEL_Y);
+            Assets.bigFont.draw(batch, "PAUSED", Constants.BOARD_X + Constants.PAUSED_LABEL_X, Constants.BOARD_Y + Constants.BOARD_PX_H / 2f + Constants.PAUSED_LABEL_Y);
         }
         batch.end();
     }
 
-    private void drawLockedBlocks(SpriteBatch batch, Board board) {
+    private static void drawBlock(SpriteBatch batch, Texture tex, float x, float y, float rotation, boolean drawRelief) {
+        float half = Constants.BLOCK_SIZE / 2f;
+        batch.draw(tex, x, y, half, half, Constants.BLOCK_SIZE, Constants.BLOCK_SIZE,
+            1, 1, rotation, 0, 0, tex.getWidth(), tex.getHeight(), false, false);
+        if (drawRelief) {
+            batch.draw(Assets.relief, x, y, Constants.BLOCK_SIZE, Constants.BLOCK_SIZE);
+        }
+    }
+
+    private static void drawLockedBlocks(SpriteBatch batch, Board board) {
         for (int r = 2; r < Constants.BOARD_ROWS; r++) {
             for (int c = 0; c < Constants.BOARD_COLS; c++) {
                 Block block = board.grid[r][c];
@@ -96,8 +92,10 @@ public class BoardRenderer {
         }
     }
 
-    private void drawPiece(SpriteBatch batch, Type type, int rotation, float x, float y, Texture tex, boolean drawRelief) {
-        if (type == null) return;
+    private static void drawPiece(SpriteBatch batch, Type type, int rotation, float x, float y, Texture tex, boolean drawRelief) {
+        if (type == null) {
+            return;
+        }
         int[][] shape = Tetromino.getShape(type, rotation);
         float rotAngle = rotation * 90f;
         for (int r = 0; r < 4; r++) {
@@ -106,42 +104,56 @@ public class BoardRenderer {
                     float gr = y + r;
                     float gc = x + c;
                     float screenR = Constants.BOARD_VISIBLE_ROWS - 1f - (gr - 2f);
-                    if (screenR < 0f) continue;
+                    if (screenR < 0f) {
+                        continue;
+                    }
                     drawBlock(batch, tex, Constants.BOARD_X + gc * Constants.BLOCK_SIZE, Constants.BOARD_Y + screenR * Constants.BLOCK_SIZE, rotAngle, drawRelief);
                 }
             }
         }
     }
 
-    private void drawGhost(SpriteBatch batch, Board board) {
-        if (board.currentType == null || board.state != Board.State.PLAYING) return;
+    private static void drawGhost(SpriteBatch batch, Board board) {
+        if (board.currentType == null || board.state != Board.State.PLAYING) {
+            return;
+        }
         int gy = board.getGhostY();
-        if (gy == board.currentY) return;
+        if (gy == board.currentY) {
+            return;
+        }
         drawPiece(batch, board.currentType, board.currentRotation, board.visualX, gy, Assets.ghostTexture, false);
     }
 
-    private void drawCurrentPiece(SpriteBatch batch, Board board) {
-        if (board.currentType == null || board.state != Board.State.PLAYING) return;
+    private static void drawCurrentPiece(SpriteBatch batch, Board board) {
+        if (board.currentType == null || board.state != Board.State.PLAYING) {
+            return;
+        }
         drawPiece(batch, board.currentType, board.currentRotation, board.visualX, board.visualY,
             Assets.blockTextures[board.currentType.ordinal()], true);
     }
 
-    private void drawClearingAnimation(SpriteBatch batch, Board board) {
+    private static void drawClearingAnimation(SpriteBatch batch, Board board) {
         float flashEnd = Constants.CLEAR_DURATION * Constants.CLEARING_SLIDE_START;
         float slideDuration = Constants.CLEAR_DURATION * (1 - Constants.CLEARING_SLIDE_START);
 
         int shifted = 0;
         int[] rowShift = new int[Constants.BOARD_ROWS];
         for (int r = Constants.BOARD_ROWS - 1; r >= 0; r--) {
-            if (board.clearedRows[r]) shifted++;
+            if (board.clearedRows[r]) {
+                shifted++;
+            }
             rowShift[r] = shifted;
         }
 
         for (int r = 2; r < Constants.BOARD_ROWS; r++) {
-            if (board.clearedRows[r]) continue;
+            if (board.clearedRows[r]) {
+                continue;
+            }
             for (int c = 0; c < Constants.BOARD_COLS; c++) {
                 Block block = board.grid[r][c];
-                if (block == null) continue;
+                if (block == null) {
+                    continue;
+                }
                 float elapsed = Math.max(0, board.clearTimer - flashEnd - board.fallDelays[r][c]);
                 float t = Math.min(elapsed / slideDuration, 1f);
                 t = t * t * (3 - 2 * t);
@@ -151,4 +163,6 @@ public class BoardRenderer {
             }
         }
     }
+
+    private BoardRenderer() {}
 }

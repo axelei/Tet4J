@@ -46,8 +46,12 @@ public class Board {
     }
 
     private Type drawFromBag() {
-        if (cheatMode) return Type.I;
-        if (bag.isEmpty()) fillBag();
+        if (cheatMode) {
+            return Type.I;
+        }
+        if (bag.isEmpty()) {
+            fillBag();
+        }
         return bag.removeLast();
     }
 
@@ -75,8 +79,12 @@ public class Board {
                 if (shape[r][c] != 0) {
                     int gr = y + r;
                     int gc = x + c;
-                    if (gc < 0 || gc >= Constants.BOARD_COLS || gr < 0 || gr >= Constants.BOARD_ROWS) return false;
-                    if (grid[gr][gc] != null) return false;
+                    if (gc < 0 || gc >= Constants.BOARD_COLS || gr < 0 || gr >= Constants.BOARD_ROWS) {
+                        return false;
+                    }
+                    if (grid[gr][gc] != null) {
+                        return false;
+                    }
                 }
             }
         }
@@ -116,14 +124,16 @@ public class Board {
             state = State.CLEARING;
             justCleared = true;
             clearTimer = 0;
-            for (int r = 0; r < Constants.BOARD_ROWS; r++)
+            for (int r = 0; r < Constants.BOARD_ROWS; r++) {
                 Arrays.fill(fallDelays[r], 0f);
+            }
             int shifted = 0;
             for (int r = Constants.BOARD_ROWS - 1; r >= 0; r--) {
                 if (clearedRows[r]) { shifted++; continue; }
                 for (int c = 0; c < Constants.BOARD_COLS; c++) {
-                    if (grid[r][c] != null)
+                    if (grid[r][c] != null) {
                         fallDelays[r][c] = (float)Math.random() * Constants.CLEAR_FALL_DELAY_MAX;
+                    }
                 }
             }
          } else {
@@ -132,7 +142,9 @@ public class Board {
     }
 
     public void update(float delta) {
-        if (state == State.GAME_OVER || state == State.PAUSED) return;
+        if (state == State.GAME_OVER || state == State.PAUSED) {
+            return;
+        }
 
         if (state == State.CLEARING) {
             clearTimer += delta;
@@ -155,7 +167,7 @@ public class Board {
         }
     }
 
-    private float dropIntervalForLevel(int level) {
+    private static float dropIntervalForLevel(int level) {
         float t = (Math.max(level, 1) - 1) / 29f;
         t = (float)Math.log(1 + t * (Math.E - 1));
         return Constants.INITIAL_DROP_INTERVAL
@@ -178,8 +190,9 @@ public class Board {
         }
         grid = newGrid;
 
-        for (int r = 0; r < Constants.BOARD_ROWS; r++)
+        for (int r = 0; r < Constants.BOARD_ROWS; r++) {
             Arrays.fill(fallDelays[r], 0f);
+        }
         Arrays.fill(clearedRows, false);
         linesCleared = 0;
         state = State.PLAYING;
@@ -187,19 +200,25 @@ public class Board {
     }
 
     public boolean moveLeft() {
-        if (state != State.PLAYING) return false;
+        if (state != State.PLAYING) {
+            return false;
+        }
         if (canPlace(currentType, currentRotation, currentX - 1, currentY)) { currentX--; return true; }
         return false;
     }
 
     public boolean moveRight() {
-        if (state != State.PLAYING) return false;
+        if (state != State.PLAYING) {
+            return false;
+        }
         if (canPlace(currentType, currentRotation, currentX + 1, currentY)) { currentX++; return true; }
         return false;
     }
 
     public boolean rotateCW() {
-        if (state != State.PLAYING) return false;
+        if (state != State.PLAYING) {
+            return false;
+        }
         int newRot = (currentRotation + 1) & Constants.ROTATION_MASK;
         if (canPlace(currentType, newRot, currentX, currentY)) {
             currentRotation = newRot;
@@ -221,7 +240,9 @@ public class Board {
     }
 
     public void softDrop() {
-        if (state != State.PLAYING) return;
+        if (state != State.PLAYING) {
+            return;
+        }
         if (canPlace(currentType, currentRotation, currentX, currentY + 1)) {
             currentY++;
             score++;
@@ -232,7 +253,9 @@ public class Board {
     }
 
     public void hardDrop() {
-        if (state != State.PLAYING) return;
+        if (state != State.PLAYING) {
+            return;
+        }
         int dropped = 0;
         while (canPlace(currentType, currentRotation, currentX, currentY + 1)) {
             currentY++;
@@ -244,16 +267,21 @@ public class Board {
     }
 
     public int getGhostY() {
-        if (state != State.PLAYING) return currentY;
+        if (state != State.PLAYING) {
+            return currentY;
+        }
         int gy = currentY;
-        while (canPlace(currentType, currentRotation, currentX, gy + 1)) gy++;
+        while (canPlace(currentType, currentRotation, currentX, gy + 1)) {
+            gy++;
+        }
         return gy;
     }
 
     public void reset() {
         for (int r = 0; r < Constants.BOARD_ROWS; r++) {
-            for (int c = 0; c < Constants.BOARD_COLS; c++)
+            for (int c = 0; c < Constants.BOARD_COLS; c++) {
                 grid[r][c] = null;
+            }
             Arrays.fill(fallDelays[r], 0f);
         }
         score = 0;

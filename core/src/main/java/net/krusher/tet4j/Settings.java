@@ -18,13 +18,13 @@ public class Settings {
      */
     public Settings() {
         this.prefs = Gdx.app.getPreferences(PREFS_NAME);
-        
+
         // Load all settings with defaults from enum
-        if (!prefs.contains("music")) {
+        if (!prefs.contains(DefaultSettings.MUSIC.name())) {
             initializeDefaults();
         }
-        
-        this.fullscreenEnabled = getBoolean("fullscreen", DefaultSettings.FULLSCREEN.getDefaultValue());
+
+        this.fullscreenEnabled = prefs.getBoolean(DefaultSettings.FULLSCREEN.name(), true);
     }
 
     /**
@@ -32,25 +32,17 @@ public class Settings {
      */
     private void initializeDefaults() {
         for (DefaultSettings setting : DefaultSettings.values()) {
-            prefs.putString(setting.name().toLowerCase(), setting.getDefaultValue());
+            prefs.putBoolean(setting.name().toLowerCase(), setting.getDefaultValue());
         }
         prefs.flush();
     }
 
-    /**
-     * Helper method to get boolean value from preferences.
-     */
-    private boolean getBoolean(String key, String defaultValue) {
-        String value = prefs.getString(key, defaultValue);
-        return value.equalsIgnoreCase("on");
-    }
-
     public boolean isMusicEnabled() {
-        return getBoolean("music", DefaultSettings.MUSIC.getDefaultValue());
+        return prefs.getBoolean(DefaultSettings.MUSIC.name(), true);
     }
 
     public boolean isSoundEffectsEnabled() {
-        return getBoolean("sound_effects", DefaultSettings.SOUND_EFFECTS.getDefaultValue());
+        return prefs.getBoolean(DefaultSettings.SOUND_EFFECTS.name(), true);
     }
 
     public boolean isFullscreenEnabled() {
@@ -66,7 +58,7 @@ public class Settings {
      * Saves current settings to preferences.
      */
     public void save() {
-        prefs.putString("fullscreen", fullscreenEnabled ? "on" : "off");
+        prefs.putBoolean(DefaultSettings.FULLSCREEN.name(), fullscreenEnabled);
         prefs.flush();
     }
 }

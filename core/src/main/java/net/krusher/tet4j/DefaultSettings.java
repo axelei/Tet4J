@@ -1,17 +1,17 @@
 package net.krusher.tet4j;
 
 public enum DefaultSettings {
-    MUSIC("on"),
-    SOUND_EFFECTS("on"),
-    FULLSCREEN("on");
+    MUSIC(true),
+    SOUND_EFFECTS(true),
+    FULLSCREEN(true);
 
-    public final String defaultValue;
+    public final boolean defaultValue;
 
-    DefaultSettings(String defaultValue) {
+    DefaultSettings(boolean defaultValue) {
         this.defaultValue = defaultValue;
     }
 
-    public String getDefaultValue() {
+    public boolean getDefaultValue() {
         return defaultValue;
     }
 }

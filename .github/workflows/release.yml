@@ -96,24 +96,24 @@ jobs:
             --notes-file release-notes.md \
             packages/*.zip
 
-       - name: Bump projectVersion on main
-         run: |
-           VERSION="${GITHUB_REF_NAME#v}"
-           git fetch origin main
-           git checkout main
-           if [ ! -f gradle.properties ]; then
-             echo "::error::gradle.properties not found on main branch"
-             echo "Files in current directory:"
-             ls -la
-             exit 1
-           fi
-           sed -i "s/^projectVersion=.*/projectVersion=$VERSION/" gradle.properties
-           if ! git diff --quiet gradle.properties; then
-             git config user.name "github-actions"
-             git config user.email "github-actions@github.com"
-             git add gradle.properties
-             git commit -m "Bump version to $VERSION [skip ci]"
-             git push
-           else
-             echo "No changes to gradle.properties, skipping commit"
-           fi
+      - name: Bump projectVersion on main
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          git fetch origin main
+          git checkout main
+          if [ ! -f gradle.properties ]; then
+            echo "::error::gradle.properties not found on main branch"
+            echo "Files in current directory:"
+            ls -la
+            exit 1
+          fi
+          sed -i "s/^projectVersion=.*/projectVersion=$VERSION/" gradle.properties
+          if ! git diff --quiet gradle.properties; then
+            git config user.name "github-actions"
+            git config user.email "github-actions@github.com"
+           git add gradle.properties
+            git commit -m "Bump version to $VERSION [skip ci]"
+            git push
+          else
+            echo "No changes to gradle.properties, skipping commit"
+          fi
