@@ -34,7 +34,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4.2.0
+      - uses: actions/checkout@v6.0.2
 
       - uses: actions/setup-java@v4.3.0
         with:
@@ -46,7 +46,7 @@ jobs:
 
       - run: ${{ matrix.gradle }} ${{ matrix.package }}
 
-      - uses: actions/upload-artifact@v4.4.3
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: construo-${{ matrix.artifact-id }}
           path: lwjgl3/build/construo/dist/*.zip
@@ -57,7 +57,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4.2.0
+      - uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
 
@@ -71,7 +71,7 @@ jobs:
           fi
 
       - name: Download packages
-        uses: actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@v8.0.1
         with:
           pattern: construo-*
           merge-multiple: true
