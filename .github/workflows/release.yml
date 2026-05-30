@@ -36,7 +36,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6.0.2
 
-      - uses: actions/setup-java@v4.3.0
+      - uses: actions/setup-java@v5.2.0
         with:
           distribution: temurin
           java-version: 21
@@ -51,8 +51,32 @@ jobs:
           name: construo-${{ matrix.artifact-id }}
           path: lwjgl3/build/construo/dist/*.zip
 
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+
+      - uses: actions/setup-java@v5.2.0
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - run: chmod +x gradlew
+
+      - run: ./gradlew :teavm:gdx_teavm_web_js_build
+
+      - name: Package web distribution
+        run: |
+          cd teavm/build/dist/web/webapp
+          zip -r ../../../../../tet4j-web.zip .
+
+      - uses: actions/upload-artifact@v7.0.1
+        with:
+          name: tet4j-web
+          path: tet4j-web.zip
+
   release:
-    needs: build
+    needs: [build, web]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -75,6 +99,12 @@ jobs:
         with:
           pattern: construo-*
           merge-multiple: true
+          path: packages
+
+      - name: Download web distribution
+        uses: actions/download-artifact@v8.0.1
+        with:
+          name: tet4j-web
           path: packages
 
       - name: Create Release

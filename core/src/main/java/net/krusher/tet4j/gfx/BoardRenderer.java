@@ -37,7 +37,7 @@ public final class BoardRenderer {
         shapes.end();
     }
 
-    public static void drawGame(SpriteBatch batch, Board board, boolean askingExit) {
+    public static void drawGame(SpriteBatch batch, Board board, boolean askingExit, int bestScore) {
 
         batch.begin();
         batch.enableBlending();
@@ -58,7 +58,7 @@ public final class BoardRenderer {
         }
 
         InfoPanel.drawPreview(batch, board);
-        InfoPanel.drawUI(batch, board);
+        InfoPanel.drawUI(batch, board, bestScore);
         if (board.state == Board.State.PAUSED && !askingExit) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
