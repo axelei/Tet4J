@@ -11,6 +11,7 @@ public class Settings {
     private static final String PREFS_NAME = "tet4j_settings";
     private final Preferences prefs;
     private boolean fullscreenEnabled;
+    private GameMode gameMode = GameMode.BAG;
 
     /**
      * Creates a new Settings instance by loading from Gdx preferences.
@@ -51,7 +52,16 @@ public class Settings {
 
     public void setFullscreenEnabled(boolean enabled) {
         this.fullscreenEnabled = enabled;
-        save();
+    }
+
+    public void setMusicEnabled(boolean enabled) {
+        prefs.putBoolean(DefaultSettings.MUSIC.name(), enabled);
+        prefs.flush();
+    }
+
+    public void setSoundEffectsEnabled(boolean enabled) {
+        prefs.putBoolean(DefaultSettings.SOUND_EFFECTS.name(), enabled);
+        prefs.flush();
     }
 
     /**
@@ -59,6 +69,8 @@ public class Settings {
      */
     public void save() {
         prefs.putBoolean(DefaultSettings.FULLSCREEN.name(), fullscreenEnabled);
+        prefs.putBoolean(DefaultSettings.SOUND_EFFECTS.name(), isSoundEffectsEnabled());
+        prefs.putBoolean(DefaultSettings.MUSIC.name(), isMusicEnabled());
         prefs.flush();
     }
 }

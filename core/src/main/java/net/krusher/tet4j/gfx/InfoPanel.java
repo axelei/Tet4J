@@ -6,6 +6,7 @@ import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Constants;
 import net.krusher.tet4j.entities.Board;
 import net.krusher.tet4j.entities.Tetromino;
+import net.krusher.tet4j.scenes.OptionsScene;
 
 public final class InfoPanel {
     private static float swingTimer;
@@ -27,20 +28,7 @@ public final class InfoPanel {
         float rot = (float) Math.sin(swingTimer * 2.5) * 3f;
         int baseX = px + Constants.INFO_PREVIEW_BLOCK_X + (int) swing;
         Texture tex = Assets.blockTextures[board.nextType.ordinal()];
-        for (int r = 0; r < 4; r++) {
-            for (int c = 0; c < 4; c++) {
-                if (shape[r][c] != 0) {
-                    batch.draw(tex,
-                        baseX + c * ps, py - r * ps,
-                        ps / 2f, ps / 2f,
-                        ps, ps,
-                        1, 1, rot,
-                        0, 0, tex.getWidth(), tex.getHeight(),
-                        false, false);
-                    batch.draw(Assets.relief, baseX + c * ps, py - r * ps, ps, ps);
-                }
-            }
-        }
+        OptionsScene.drawPiece(py, baseX, shape, ps, rot, tex, batch);
     }
 
     public static void drawUI(SpriteBatch batch, Board board) {

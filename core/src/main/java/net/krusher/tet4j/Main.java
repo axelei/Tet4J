@@ -15,6 +15,7 @@ import net.krusher.tet4j.gfx.SplashBackground;
 import net.krusher.tet4j.scenes.GameOverScene;
 import net.krusher.tet4j.scenes.PauseScene;
 import net.krusher.tet4j.scenes.PlayScene;
+import net.krusher.tet4j.scenes.OptionsScene;
 import net.krusher.tet4j.scenes.Scene;
 import net.krusher.tet4j.scenes.SplashScene;
 
@@ -27,6 +28,7 @@ public class Main extends ApplicationAdapter {
 
     private Scene activeScene;
     private SplashScene splashScene;
+    private OptionsScene optionsScene;
     private PlayScene playScene;
     private GameOverScene gameOverScene;
 
@@ -53,6 +55,7 @@ public class Main extends ApplicationAdapter {
         MusicManager.init(settings);
 
         splashScene = new SplashScene(batch, board);
+        optionsScene = new OptionsScene(batch, shapes, settings, splashScene);
         PauseScene pauseScene = new PauseScene(shapes, batch, board, splashScene);
         playScene = new PlayScene(batch, shapes, board, pauseScene, settings);
         gameOverScene = new GameOverScene(batch, shapes, board, splashScene, settings);
@@ -91,8 +94,14 @@ public class Main extends ApplicationAdapter {
         activeScene.render();
         activeScene.handleInput();
 
-        if (activeScene == splashScene && splashScene.isFinished()) {
+        if (activeScene == splashScene && splashScene.isOptionsRequested()) {
+            optionsScene.reset();
+            activeScene = optionsScene;
+        } else if (activeScene == splashScene && splashScene.isFinished()) {
             activeScene = playScene;
+        }
+        if (activeScene == optionsScene && !splashScene.isFinished()) {
+            activeScene = splashScene;
         }
         if (activeScene == playScene && !splashScene.isFinished()) {
             activeScene = splashScene;

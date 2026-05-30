@@ -14,6 +14,7 @@ public class SplashScene implements Scene {
     private final SpriteBatch batch;
     private final Board board;
     private boolean finished;
+    private boolean optionsRequested;
     private boolean audioStarted;
     private boolean anyKey;
 
@@ -60,6 +61,11 @@ public class SplashScene implements Scene {
             finish();
         }
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.O)) {
+            optionsRequested = true;
+            finished = true;
+        }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             finish();
         }
@@ -79,7 +85,12 @@ public class SplashScene implements Scene {
         return finished;
     }
 
+    public boolean isOptionsRequested() {
+        return optionsRequested;
+    }
+
     public void reset() {
         finished = false;
+        optionsRequested = false;
     }
 }

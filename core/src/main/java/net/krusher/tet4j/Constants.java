@@ -101,6 +101,13 @@ public class Constants {
     public static final int GAME_OVER_LABEL_X = 30;
     public static final int RESTART_PROMPT_X = 68;
 
+    public static final int OPTIONS_TITLE_Y = 900;
+    public static final int OPTIONS_FIRST_Y = 720;
+    public static final int OPTIONS_STEP = 80;
+    public static final int OPTIONS_VALUE_X = 1100;
+    public static final float OPTIONS_OVERLAY_ALPHA = 0.65f;
+    public static final Color OPTIONS_TINT = new Color(0.08f, 0.08f, 0.1f, 0.85f);
+
     public static final int SPLASH_LICENSE_X = 20;
     public static final int SPLASH_LICENSE_Y = 40;
     public static final int SPLASH_INSTRUCTION_Y = 420;
