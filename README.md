@@ -1,14 +1,12 @@
 # Tet4J
 
-<p align="center">
+<p style="text-align: center">
   <img src="assets/graphics/tet4j_logo.png" alt="Tet4J Logo" width="600">
 </p>
 
-<p align="center">
-  <strong>Tet4J</strong> (Tetrominoes for Java) is an easygoing, block-stacking puzzle game in a relaxed mood, built (and mostly vibecoded) using <b><a href="https://libgdx.com/">libGDX</a></b>.
-</p>
+<strong>Tet4J</strong> (Tetrominoes for Java) is an easygoing, block-stacking puzzle game in a relaxed mood, built (and mostly vibecoded) using <b><a href="https://libgdx.com/">libGDX</a></b>.
 
-<p align="center">
+<p style="text-align: center">
   <img src="https://img.shields.io/badge/Java-21-orange?logo=openjdk" alt="Java 21">
   <img src="https://img.shields.io/badge/Framework-libGDX-red" alt="libGDX">
 </p>
@@ -19,6 +17,7 @@
 Arrange falling shapes into complete rows to clear them from the board. As you clear lines, you will level up, increase your score, and unlock new beautifully crafted backgrounds to match the chill atmosphere.
 
 ### 🎨 Assets & Licensing
+* **Code:** [GPL 3 license](LICENSE.txt). 
 * **Original Assets:** Created by the author and distributed under the [CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/deed) unless stated otherwise.
 * **Art & Branding:** The logo and the splash screen are AI-generated. (Help wanted to replace them!)
 * **Third-party Assets:** For full credits and external licenses, please check the [attributions file](attributions.md).
@@ -33,6 +32,11 @@ Arrange falling shapes into complete rows to clear them from the board. As you c
 | Space | Hard drop          |
 | Alt+Enter | Switch full screen |
 | Alt+F4 | Quit immediately   |
+
+### The modes
+* **NOVA:** Modern bag system. The recommended mode. 
+* **MITIGATION:**  Random, but trying not to repeat pieces. (If you are unlucky there can be repeated pieces still)
+* **CHAOS:** Totally random pieces will fall. You are on your own.
 
 ## 🛠️ System Requirements
 * **Java Development Kit (JDK):** Version 21 or higher (only required if you are building from source).
