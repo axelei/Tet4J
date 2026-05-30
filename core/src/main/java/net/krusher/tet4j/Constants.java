@@ -87,8 +87,13 @@ public class Constants {
     public static final int INFO_PREVIEW_BLOCK_X = 135;
     public static final int INFO_LABEL_VALUE_GAP = 48;
     public static final int INFO_VALUE_LABEL_GAP = 66;
+    public static final int INFO_KEY_X_LEFT = 120;
+    public static final int INFO_KEY_X_RIGHT = 1400;
     public static final int INFO_KEY_LABEL_FIRST = 180;
     public static final int INFO_KEY_LABEL_STEP = 45;
+    public static final int INFO_KEY_LABEL_TOP = 880;
+    public static final int PIECE_COUNT_Y = 660;
+    public static final int PIECE_COUNT_SIZE = 24;
 
     public static final int QUIT_PROMPT_X = 105;
     public static final int CONFIRM_PROMPT_X = 165;
@@ -99,6 +104,7 @@ public class Constants {
     public static final int PAUSED_LABEL_Y = 24;
 
     public static final int GAME_OVER_LABEL_X = 30;
+    public static final int GAME_OVER_NEW_BEST_Y = 415;
     public static final int RESTART_PROMPT_X = 68;
 
     public static final int OPTIONS_TITLE_Y = 900;
@@ -111,4 +117,6 @@ public class Constants {
     public static final int SPLASH_LICENSE_X = 20;
     public static final int SPLASH_LICENSE_Y = 40;
     public static final int SPLASH_INSTRUCTION_Y = 420;
+
+    public static final int SMALL_TEXT_HEIGHT = 45;
 }

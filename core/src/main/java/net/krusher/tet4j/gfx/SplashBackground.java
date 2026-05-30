@@ -140,12 +140,20 @@ public final class SplashBackground {
         batch.draw(Assets.logoTexture, logoX, logoY, logoW, logoH);
         batch.setShader(prev);
 
-        String splashText = IS_WEB ? "press SPACE to start" : "SPACE to start, ESC to quit";
+        int offset = 0;
+        TextRenderer.drawTextWithBgCentered(batch, Assets.font, "press SPACE to start",
+            Constants.SPLASH_INSTRUCTION_Y, Constants.TEXT_BG_PAD * 2);
+        offset -= Constants.SMALL_TEXT_HEIGHT;
+        TextRenderer.drawTextWithBgCentered(batch, Assets.font, "O for options",
+            Constants.SPLASH_INSTRUCTION_Y + offset, Constants.TEXT_BG_PAD * 2);
+        if (!IS_WEB){
+            offset -= Constants.SMALL_TEXT_HEIGHT;
+            TextRenderer.drawTextWithBgCentered(batch, Assets.font, "ESC to quit",
+                Constants.SPLASH_INSTRUCTION_Y + offset, Constants.TEXT_BG_PAD * 2);
+        }
 
         TextRenderer.drawTextWithBg(batch, Assets.font, "TET4J " + BuildInfo.VERSION + " by Krusher 2026, licensed under GPL 3",
             Constants.SPLASH_LICENSE_X, Constants.SPLASH_LICENSE_Y, Constants.TEXT_BG_PAD * 2);
-        TextRenderer.drawTextWithBgCentered(batch, Assets.bigFont, splashText,
-            Constants.SPLASH_INSTRUCTION_Y, Constants.TEXT_BG_PAD * 2);
         batch.end();
     }
 

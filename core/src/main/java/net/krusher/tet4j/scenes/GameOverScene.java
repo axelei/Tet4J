@@ -21,6 +21,7 @@ public class GameOverScene implements Scene {
     private final SplashScene splashScene;
     private final Settings settings;
     private long gameOverSoundId = -1;
+    private boolean newBest;
 
     public GameOverScene(SpriteBatch batch, ShapeRenderer shapes, Board board,
                          SplashScene splashScene, Settings settings) {
@@ -29,6 +30,10 @@ public class GameOverScene implements Scene {
         this.board = board;
         this.splashScene = splashScene;
         this.settings = settings;
+    }
+
+    public void setNewBest(boolean newBest) {
+        this.newBest = newBest;
     }
 
     @Override
@@ -41,8 +46,8 @@ public class GameOverScene implements Scene {
     public void render() {
         BackgroundManager.draw(batch);
         BoardRenderer.drawBoardBackground(shapes);
-        BoardRenderer.drawGame(batch, board, false);
-        GameOverOverlay.draw(batch, shapes);
+        BoardRenderer.drawGame(batch, board, false, settings.getBestScore(board.getGameMode().getId()));
+        GameOverOverlay.draw(batch, shapes, newBest);
     }
 
     @Override
@@ -52,6 +57,7 @@ public class GameOverScene implements Scene {
                 Assets.sfxGameOver.stop(gameOverSoundId);
                 gameOverSoundId = -1;
             }
+            newBest = false;
             ParticleSystem.clear();
             BackgroundManager.reset(Constants.STARTING_LEVEL);
             splashScene.reset();

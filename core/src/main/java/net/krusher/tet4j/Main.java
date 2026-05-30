@@ -54,7 +54,7 @@ public class Main extends ApplicationAdapter {
         SplashBackground.init();
         MusicManager.init(settings);
 
-        splashScene = new SplashScene(batch, board);
+        splashScene = new SplashScene(batch, board, settings);
         optionsScene = new OptionsScene(batch, shapes, settings, splashScene);
         PauseScene pauseScene = new PauseScene(shapes, batch, board, splashScene);
         playScene = new PlayScene(batch, shapes, board, pauseScene, settings);
@@ -108,6 +108,8 @@ public class Main extends ApplicationAdapter {
         }
         if (activeScene == playScene && board.justGameOver) {
             gameOverScene.playGameOverSound();
+            boolean newBest = settings.isNewBestScore(board.getGameMode().getId(), board.score);
+            gameOverScene.setNewBest(newBest);
             board.justGameOver = false;
             board.justLocked = false;
             activeScene = gameOverScene;

@@ -1,13 +1,12 @@
 package net.krusher.tet4j.entities;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Arrays;
 
 import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Constants;
 import net.krusher.tet4j.entities.Tetromino.Type;
+import net.krusher.tet4j.modes.GameMode;
+import net.krusher.tet4j.modes.ModeId;
 
 public class Board {
     public enum State { PLAYING, CLEARING, GAME_OVER, PAUSED }
@@ -24,6 +23,7 @@ public class Board {
 
     public boolean justCleared;
     public boolean justLocked;
+    public int[] pieceCounts = new int[7];
     public boolean justGameOver;
     public int lockX;
     public boolean[] clearedRows = new boolean[Constants.BOARD_ROWS];
@@ -31,7 +31,7 @@ public class Board {
     public float clearTimer;
     public float[][] fallDelays = new float[Constants.BOARD_ROWS][Constants.BOARD_COLS];
 
-    private List<Type> bag = new ArrayList<>();
+    private GameMode gameMode = GameMode.forId(ModeId.NOVA);
     private float dropTimer;
     private float dropInterval = Constants.INITIAL_DROP_INTERVAL;
 
@@ -39,25 +39,28 @@ public class Board {
         reset();
     }
 
-    private void fillBag() {
-        bag.clear();
-        Collections.addAll(bag, Type.values());
-        Collections.shuffle(bag, new java.util.Random());
+    public GameMode getGameMode() {
+        return gameMode;
     }
 
-    private Type drawFromBag() {
+    public void setGameMode(GameMode mode) {
+        this.gameMode = mode;
+    }
+
+    private Type drawFromBag(Type previousType) {
         if (cheatMode) {
             return Type.I;
         }
-        if (bag.isEmpty()) {
-            fillBag();
-        }
-        return bag.removeLast();
+        return gameMode.nextType(previousType);
     }
 
     public void spawnPiece() {
+        Type prev = currentType;
         currentType = nextType;
-        nextType = drawFromBag();
+        if (currentType != null) {
+            pieceCounts[currentType.ordinal()]++;
+        }
+        nextType = drawFromBag(prev);
         currentX = Constants.SPAWN_X;
         currentY = 0;
         currentRotation = 0;
@@ -295,9 +298,8 @@ public class Board {
         Arrays.fill(clearedRows, false);
         linesCleared = 0;
         clearTimer = 0;
-        bag.clear();
-        fillBag();
-        nextType = drawFromBag();
+        java.util.Arrays.fill(pieceCounts, 0);
+        nextType = drawFromBag(null);
         spawnPiece();
     }
 }

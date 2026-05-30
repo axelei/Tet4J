@@ -62,7 +62,7 @@ public class PlayScene implements Scene {
     public void render() {
         BackgroundManager.draw(batch);
         BoardRenderer.drawBoardBackground(shapes);
-        BoardRenderer.drawGame(batch, board, pauseScene.isAskingExit());
+        BoardRenderer.drawGame(batch, board, pauseScene.isAskingExit(), settings.getBestScore(board.getGameMode().getId()));
         pauseScene.render();
     }
 

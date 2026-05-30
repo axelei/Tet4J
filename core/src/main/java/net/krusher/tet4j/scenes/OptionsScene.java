@@ -9,8 +9,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import net.krusher.tet4j.Assets;
 import net.krusher.tet4j.Constants;
-import net.krusher.tet4j.GameMode;
 import net.krusher.tet4j.Settings;
+import net.krusher.tet4j.modes.ModeId;
 import net.krusher.tet4j.audio.MusicManager;
 import net.krusher.tet4j.entities.Tetromino;
 import net.krusher.tet4j.gfx.GraphicsManager;
@@ -45,7 +45,7 @@ public class OptionsScene implements Scene {
         showFullscreen = settings.isFullscreenEnabled();
         showMusic = settings.isMusicEnabled();
         showSfx = settings.isSoundEffectsEnabled();
-        showMode = 0;
+        showMode = settings.getGameMode().ordinal();
         randomizeCursor();
     }
 
@@ -109,7 +109,7 @@ public class OptionsScene implements Scene {
             case 0 -> showFullscreen ? "ON" : "OFF";
             case 1 -> showMusic ? "ON" : "OFF";
             case 2 -> showSfx ? "ON" : "OFF";
-            case 3 -> GameMode.values()[showMode].name();
+            case 3 -> ModeId.values()[showMode].name();
             default -> null;
         };
     }
@@ -176,11 +176,16 @@ public class OptionsScene implements Scene {
     }
 
     private void updateShowMode(Integer key) {
-        int numGameModes = GameMode.values().length;
+        ModeId[] modes = ModeId.values();
+        int numGameModes = modes.length;
+        int prev = showMode;
         if (key == Input.Keys.LEFT) {
             showMode = (showMode - 1 + numGameModes) % numGameModes;
         } else {
             showMode = (showMode + 1) % numGameModes;
+        }
+        if (showMode != prev) {
+            settings.setGameMode(modes[showMode]);
         }
     }
 

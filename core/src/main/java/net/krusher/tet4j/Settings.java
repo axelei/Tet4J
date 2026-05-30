@@ -2,52 +2,60 @@ package net.krusher.tet4j;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import net.krusher.tet4j.modes.ModeId;
 
-/**
- * Settings class that manages game preferences using Gdx.app.getPreferences.
- * Settings are automatically persisted to the platform-specific preferences storage.
- */
+import java.util.Locale;
+
 public class Settings {
     private static final String PREFS_NAME = "tet4j_settings";
     private final Preferences prefs;
     private boolean fullscreenEnabled;
-    private GameMode gameMode = GameMode.BAG;
+    private ModeId gameMode = ModeId.NOVA;
 
-    /**
-     * Creates a new Settings instance by loading from Gdx preferences.
-     * Creates default settings if preferences don't exist.
-     */
     public Settings() {
         this.prefs = Gdx.app.getPreferences(PREFS_NAME);
 
-        // Load all settings with defaults from enum
         if (!prefs.contains(DefaultSettings.MUSIC.name())) {
             initializeDefaults();
         }
 
-        this.fullscreenEnabled = prefs.getBoolean(DefaultSettings.FULLSCREEN.name(), true);
+        this.fullscreenEnabled = prefs.getBoolean(DefaultSettings.FULLSCREEN.name(), false);
+
+        String modeName = prefs.getString(DefaultSettings.GAME_MODE.name(), null);
+        if (modeName != null) {
+            try {
+                this.gameMode = ModeId.valueOf(modeName.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                this.gameMode = ModeId.NOVA;
+            }
+        }
     }
 
-    /**
-     * Initializes preferences with default values from DefaultSettings enum.
-     */
     private void initializeDefaults() {
         for (DefaultSettings setting : DefaultSettings.values()) {
-            prefs.putBoolean(setting.name(), setting.getDefaultValue());
+            if (setting.stringValue != null) {
+                prefs.putString(setting.name(), setting.stringValue);
+            } else {
+                prefs.putBoolean(setting.name(), setting.boolValue);
+            }
         }
         prefs.flush();
     }
 
     public boolean isMusicEnabled() {
-        return prefs.getBoolean(DefaultSettings.MUSIC.name(), true);
+        return prefs.getBoolean(DefaultSettings.MUSIC.name(), false);
     }
 
     public boolean isSoundEffectsEnabled() {
-        return prefs.getBoolean(DefaultSettings.SOUND_EFFECTS.name(), true);
+        return prefs.getBoolean(DefaultSettings.SOUND_EFFECTS.name(), false);
     }
 
     public boolean isFullscreenEnabled() {
         return fullscreenEnabled;
+    }
+
+    public ModeId getGameMode() {
+        return gameMode;
     }
 
     public void setFullscreenEnabled(boolean enabled) {
@@ -64,13 +72,28 @@ public class Settings {
         prefs.flush();
     }
 
-    /**
-     * Saves current settings to preferences.
-     */
+    public void setGameMode(ModeId mode) {
+        this.gameMode = mode;
+    }
+
+    public int getBestScore(ModeId mode) {
+        return prefs.getInteger("BEST_" + mode.name(), 0);
+    }
+
+    public boolean isNewBestScore(ModeId mode, int score) {
+        if (score > getBestScore(mode)) {
+            prefs.putInteger("BEST_" + mode.name(), score);
+            prefs.flush();
+            return true;
+        }
+        return false;
+    }
+
     public void save() {
         prefs.putBoolean(DefaultSettings.FULLSCREEN.name(), fullscreenEnabled);
         prefs.putBoolean(DefaultSettings.SOUND_EFFECTS.name(), isSoundEffectsEnabled());
         prefs.putBoolean(DefaultSettings.MUSIC.name(), isMusicEnabled());
+        prefs.putString(DefaultSettings.GAME_MODE.name(), gameMode.name());
         prefs.flush();
     }
 }
